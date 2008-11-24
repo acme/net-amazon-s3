@@ -1,0 +1,31 @@
+--- #YAML:1.0
+name:                Net-Amazon-S3
+version:             0.45
+abstract:            Use the Amazon S3 - Simple Storage Service
+license:             perl
+author:              
+    - Leon Brocard <acme@astray.com>
+generated_by:        ExtUtils::MakeMaker version 6.44
+distribution_type:   module
+requires:     
+    Class::Accessor::Fast:         0
+    Data::Stream::Bulk::Callback:  0
+    Digest::HMAC_SHA1:             0
+    Digest::MD5:                   0
+    Digest::MD5::File:             0
+    File::stat:                    0
+    HTTP::Date:                    0
+    HTTP::Status:                  0
+    IO::File:                      1.14
+    LWP::UserAgent::Determined:    0
+    MIME::Base64:                  0
+    Moose:                         0
+    MooseX::StrictConstructor:     0
+    Regexp::Common:                0
+    Test::More:                    0.01
+    URI::Escape:                   0
+    XML::LibXML:                   0
+    XML::LibXML::XPathContext:     0
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

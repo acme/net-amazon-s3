@@ -1,0 +1,299 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use Path::Class;
+
+# TODO: read key_id and secret from config file?
+# use AppConfig;
+
+# TODO: probably nicer to put all of this in Net::Amazon::S3::CommandLine
+# and have simple call to that from here.
+
+my $aws_access_key_id     = $ENV{'AWS_ACCESS_KEY_ID'};
+my $aws_secret_access_key = $ENV{'AWS_ACCESS_KEY_SECRET'};
+
+my $s3 = Net::Amazon::S3->new(
+    {   aws_access_key_id     => $aws_access_key_id,
+        aws_secret_access_key => $aws_secret_access_key,
+        retry                 => 1,
+    }
+);
+
+=head1 NAME
+
+s3cl - Command line for Amazon s3 cloud storage
+
+=head1 SYNOPSIS
+
+s3cl command [options] 
+
+  s3cl buckets
+  s3cl ls <bucket>:[prefix]
+  s3cl cp <bucket>:<key> /path/[filename]
+  s3cl sync <bucket>:[prefix] /path/
+  s3cl rm <bucket>:<key>
+
+ Options:
+   -help            brief help message
+   -man             full documentation
+
+ We take NO responsibility for the costs incured through using
+ this script.
+
+=head1 DESCRIPTION
+
+This program gives a command line interface to Amazons s3 storage
+service. It does not limit the number of requests (which may cost
+you more money than if you did it a different way!) and each
+request costs Money (although some costs from EC2 may be $0.0,
+check latest from Amazon costs page) - we take NO reponsibility
+for your bill.
+
+=cut
+
+my %args;
+
+my %commands = (
+    buckets => \&buckets,
+    ls      => \&ls,
+    rm      => \&rm,
+    cp      => \&cp,
+    sync    => \&sync,
+    help    => \&helper,
+);
+
+terminal();
+get_options();
+main();
+
+sub main {
+    my $command = shift @ARGV || "help";
+    $commands{$command}
+        or helper("Unknown command: $command");
+    $commands{$command}->();
+}
+
+sub sync {
+    my $dest = $args{dest} || '';
+    helper("No destination supplied") if $dest eq '';
+    helper("Can not write to: $args{dest}") unless -w $dest;
+
+    my $bucket = _get_bucket();
+
+    my $list = ls('data');
+    foreach my $key ( @{ $list->{keys} } ) {
+        my $source = file( $key->{key} );
+        my $destination = file( $dest, $source );
+        $destination->dir->mkpath();
+        warn "$source -> $destination";
+        my $response
+            = $bucket->get_key_filename( $source->stringify, 'GET',
+            $destination->stringify )
+            or die $s3->err . ": " . $s3->errstr;
+    }
+}
+
+sub cp {
+    my $dest = $args{dest} || '';
+    helper("No destination supplied") if $dest eq '';
+
+    my $key = $args{prefix_or_key} || helper("No key supplied");
+
+    if ( -d $dest ) {
+
+        # If we have a directory we need to add the file name
+        $dest = file( $dest, file($key)->basename );
+    }
+
+    my $bucket = _get_bucket();
+
+    unless ( $bucket->get_key_filename( "$key", 'GET', "$dest" ) ) {
+        die $s3->err . ": " . $s3->errstr if $s3->err;
+        die "Could not copy $key from bucket $args{bucket}";
+    }
+}
+
+sub ls {
+    my $mode = shift || 'print';
+    my $bucket = _get_bucket();
+
+    my $ls_conf;
+    $ls_conf->{prefix} = $args{prefix_or_key} if $args{prefix_or_key};
+
+    # list files in the bucket
+    my $response = $bucket->list_all($ls_conf)
+        or die $s3->err . ": " . $s3->errstr;
+    return $response if $mode eq 'data';
+    foreach my $key ( @{ $response->{keys} } ) {
+        my $key_last_modified
+            = $key->{last_modified};    # 2008-07-14T22:31:10.000Z
+        $key_last_modified =~ s/:\d{2}\.\d{3}Z$//;
+        my $key_name = $key->{key};
+        my $key_size = $key->{size};
+        print "$key_size $key_last_modified $key_name\n";
+    }
+}
+
+sub rm {
+    my $bucket = _get_bucket();
+
+    helper("Must have a <bucket>:<key>") unless $args{prefix_or_key};
+    my $res = "NO";
+    if ( $args{force} ) {
+        $res = 'y';
+    } else {
+        print "\nOnce deleted there is no way to retrieve this key again."
+            . "\nAre you sure you want to delete $args{bucket}:$args{prefix_or_key}? y/N\n";
+        ( $res = <STDIN> ) =~ s/\n//;
+    }
+
+    if ( $res eq 'y' ) {
+
+        # delete key in this bucket
+        my $response = $bucket->delete_key( $args{prefix_or_key} )
+            or die $s3->err . ": " . $s3->errstr;
+    }
+}
+
+sub buckets {
+    my $response = $s3->buckets;
+    my $num = scalar @{ $response->{buckets} || [] };
+    print "You have $num bucket";
+    print "s" if $num != 1;
+    print ":\n";
+    foreach my $bucket ( @{ $response->{buckets} } ) {
+        print '- ' . $bucket->bucket . "\n";
+    }
+}
+
+sub terminal {
+    my $encoding = eval {
+        require Term::Encoding;
+        Term::Encoding::get_encoding();
+    } || "utf-8";
+
+    binmode STDOUT, ":encoding($encoding)";
+}
+
+# TODO: Replace with AppConfig this is ick!
+sub get_options {
+    my $help  = 0;
+    my $man   = 0;
+    my $force = 0;
+    GetOptions(
+        \%args, "bucket=s",
+        "f|force"  => \$force,
+        "h|help|?" => \$help,
+        "man"      => \$man,
+    ) or pod2usage(2);
+
+    $args{force} = $force;
+
+    foreach my $arg (@ARGV) {
+        if ( $arg =~ /:/ ) {
+            my ( $b, $rest ) = split( ":", $arg );
+            $args{bucket}        = $b;
+            $args{prefix_or_key} = $rest;
+        }
+    }
+
+    # For cp
+    $args{dest} = $ARGV[2] if $ARGV[2];
+
+    pod2usage(1) if $help || @ARGV == 0;
+    pod2usage( -verbose => 2 ) if $man;
+}
+
+sub _get_bucket {
+    helper("No bucket supplied") unless $args{bucket};
+    my $bucket = $s3->bucket( $args{bucket} );
+    die $s3->err . ": " . $s3->errstr if $s3->err;
+    helper("Could not get bucket $args{bucket}") unless $bucket;
+    return $bucket;
+}
+
+sub helper {
+    my $msg = shift;
+    if ($msg) {
+        pod2usage( -message => $msg, -exitval => 2 );
+    }
+
+    exit;
+}
+
+__DATA__
+
+=head1 COMMANDS
+
+=over 4
+
+=item B<buckets>
+
+s3cl buckets
+
+List all buckets for this account.
+
+=item B<ls>
+
+s3cl ls <bucket>:[prefix]
+
+List contents of a bucket, the optional B<prefix> can be partial, in which
+case all keys matching this as the start of the key name will be returned.
+If no B<prefix> is supplied all keys of the bucket will be returned.
+
+=item B<cp>
+
+s3cl cp <bucket>:<key> target_file
+
+s3cl cp <bucket>:<key> target_directory
+
+Copy a single key from the bucket to the target file, or into
+the target_directory.
+
+=item B<sync>
+
+s3cl sync <bucket>:[prefix] target_dir
+
+Downloads all files matching the prefix into a directory structure
+replicating that of the prefix and all 'sub-directories'. It will 
+download ALL files - even if already on your local disk:
+
+http://www.amazon.com/gp/browse.html?node=16427261
+
+  #  Data transfer "in" and "out" refers to transfer into and out 
+  #  of Amazon S3.  Data transferred between Amazon EC2 and  
+  #  Amazon S3, is free of charge (i.e., $0.00 per GB), except  
+  #  data transferred between Amazon EC2 and Amazon S3-Europe,  
+  #  which will be charged at regular rates.
+
+=item B<rm>
+
+s3cl rm <bucket>:<key>
+
+Remove a key(file) from the bucket, removing a non-existent file
+is not classed as an error. Once removed the key (file) can not 
+be restored - so use with care!
+
+=back
+
+=head1 ABOUT
+
+This module contains code modified from Amazon that contains the
+following notice (which is also applicicable to this code):
+
+  #  This software code is made available "AS IS" without 
+  #  warranties of any kind.  You may copy, display, modify and 
+  #  redistribute the software code either by itself or as incorporated 
+  #  into your code; provided that you do not remove any proprietary 
+  #  notices.  Your use of this software code is at your own risk and 
+  #  you waive any claim against Amazon Digital Services, Inc. or its 
+  #  affiliates with respect to your use of this software code. 
+  #  (c) 2006 Amazon Digital Services, Inc. or its affiliates.
+
+=head1 AUTHOR
+
+Leo Lapworth <LLAP@cuckoo.org> - Part of the HinuHinu project
+
+=cut

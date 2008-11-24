@@ -89,6 +89,12 @@ DESCRIPTION
     stored in values. Values are referenced by keys, and keys are stored in
     buckets. Bucket names are global.
 
+    Note: This is the legacy interface, please check out
+    Net::Amazon::S3::Client instead.
+
+    Development of this code happens here:
+    http://github.com/acme/net-amazon-s3
+
 METHODS
   new
     Create a new S3 client object. Takes some arguments:

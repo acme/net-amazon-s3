@@ -96,6 +96,11 @@ I highly recommend reading all about S3, but in a nutshell data is
 stored in values. Values are referenced by keys, and keys are stored
 in buckets. Bucket names are global.
 
+Note: This is the legacy interface, please check out
+L<Net::Amazon::S3::Client> instead.
+
+Development of this code happens here: http://github.com/acme/net-amazon-s3
+
 =cut
 
 use Carp;
@@ -135,7 +140,7 @@ has 'ua'     => ( is => 'rw', isa => 'LWP::UserAgent', required => 0 );
 has 'err'    => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 
 my $KEEP_ALIVE_CACHESIZE = 10;
 

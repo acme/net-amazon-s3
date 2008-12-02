@@ -140,7 +140,7 @@ has 'ua'     => ( is => 'rw', isa => 'LWP::UserAgent', required => 0 );
 has 'err'    => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
-our $VERSION = '0.46';
+our $VERSION = '0.47';
 
 my $KEEP_ALIVE_CACHESIZE = 10;
 
@@ -491,6 +491,7 @@ sub list_bucket {
         delimiter => $conf->{delimiter},
         max_keys  => $conf->{max_keys},
         marker    => $conf->{marker},
+        prefix    => $conf->{prefix},
     )->http_request;
 
     my $xpc = $self->_send_request($http_request);

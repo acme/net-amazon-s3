@@ -1,5 +1,8 @@
 Revision history for Perl module Net::Amazon::S3:
 
+0.47
+    - fix listing with a prefix (spotted by Nobuo Danjou)
+
 0.46 Mon Nov 24 08:53:18 GMT 2008
     - refactor request creation into Net::Amazon::S3::Request
       and many subclasses

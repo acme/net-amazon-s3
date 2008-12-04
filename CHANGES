@@ -1,5 +1,10 @@
 Revision history for Perl module Net::Amazon::S3:
 
+0.48
+    - be slightly less strict about bucket names: they can contain uppercase
+      letters, Amazon just doesn't recommend it (noticed by Simon Elliott,
+      fixes Brackup)
+
 0.47 Tue Dec  2 08:03:39 GMT 2008
     - fix listing with a prefix (spotted by Nobuo Danjou)
 

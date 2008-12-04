@@ -15,13 +15,13 @@ enum 'LocationConstraint' => ( 'US', 'EU' );
 # Not be in an IP address style (e.g., "192.168.5.4")
 
 subtype 'BucketName1' => as 'Str' => where {
-    $_ =~ /^[a-z0-9._-]+$/;
+    $_ =~ /^[a-zA-Z0-9._-]+$/;
 } => message {
     "Bucket name ($_) must contain lowercase letters, numbers, periods (.), underscores (_), and dashes (-)";
 };
 
 subtype 'BucketName2' => as 'BucketName1' => where {
-    $_ =~ /^[a-z0-9]/;
+    $_ =~ /^[a-zA-Z0-9]/;
 } => message {
     "Bucket name ($_) must start with a number or letter";
 };

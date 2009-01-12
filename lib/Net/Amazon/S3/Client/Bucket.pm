@@ -64,7 +64,9 @@ sub location_constraint {
 }
 
 sub list {
-    my $self = shift;
+    my ( $self, $conf ) = @_;
+    $conf ||= {};
+    my $prefix = $conf->{prefix};
 
     my $marker = undef;
     my $end    = 0;
@@ -78,6 +80,7 @@ sub list {
                 s3     => $self->client->s3,
                 bucket => $self->name,
                 marker => $marker,
+                prefix => $prefix,
             )->http_request;
 
             my $xpc = $self->client->_send_request_xpc($http_request);
@@ -163,6 +166,9 @@ Net::Amazon::S3::Client::Bucket - An easy-to-use Amazon S3 client bucket
     }
   }
 
+  # or list by a prefix
+  my $prefix_stream = $bucket->list( { prefix => 'logs/' } );
+
   # returns a L<Net::Amazon::S3::Client::Object>, which can then
   # be used to get or put
   my $object = $bucket->object( key => 'this is the key' );
@@ -198,6 +204,9 @@ This module represents buckets.
       ...
     }
   }
+
+  # or list by a prefix
+  my $prefix_stream = $bucket->list( { prefix => 'logs/' } );
 
 =head2 location_constraint
 

@@ -11,7 +11,7 @@ use Test::Exception;
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
 } else {
-    plan tests => 31;
+    plan tests => 33;
 }
 
 use_ok('Net::Amazon::S3');
@@ -80,14 +80,33 @@ my $object = $bucket->object( key => 'this is the key' );
 $object->put('this is the value');
 
 my @objects;
-$stream = $bucket->list;
+
+@objects = ();
+$stream = $bucket->list( { prefix => 'this is the key' } );
 until ( $stream->is_done ) {
     foreach my $object ( $stream->items ) {
         push @objects, $object;
     }
 }
+is( @objects, 1, 'bucket list with prefix finds key' );
 
-is( @objects, 1, 'have newly created key' );
+@objects = ();
+$stream = $bucket->list( { prefix => 'this is not the key' } );
+until ( $stream->is_done ) {
+    foreach my $object ( $stream->items ) {
+        push @objects, $object;
+    }
+}
+is( @objects, 0, 'bucket list with different prefix does not find key' );
+
+@objects = ();
+$stream  = $bucket->list;
+until ( $stream->is_done ) {
+    foreach my $object ( $stream->items ) {
+        push @objects, $object;
+    }
+}
+is( @objects, 1, 'bucket list finds newly created key' );
 
 is( $objects[0]->key,
     'this is the key',

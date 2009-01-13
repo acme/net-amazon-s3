@@ -140,7 +140,7 @@ has 'ua'     => ( is => 'rw', isa => 'LWP::UserAgent', required => 0 );
 has 'err'    => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 
 my $KEEP_ALIVE_CACHESIZE = 10;
 

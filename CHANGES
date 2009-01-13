@@ -1,6 +1,6 @@
 Revision history for Perl module Net::Amazon::S3:
 
-0.49
+0.49 Tue Jan 13 09:04:42 GMT 2009
     - add support for listing a bucket with a prefix to
       Net::Amazon::S3::Client::Bucket
 

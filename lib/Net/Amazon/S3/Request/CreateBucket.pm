@@ -7,6 +7,8 @@ has 'acl_short' => ( is => 'ro', isa => 'Maybe[AclShort]', required => 0 );
 has 'location_constraint' =>
     ( is => 'ro', isa => 'Maybe[LocationConstraint]', required => 0 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self = shift;
 

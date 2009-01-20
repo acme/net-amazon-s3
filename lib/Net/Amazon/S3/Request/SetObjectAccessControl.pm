@@ -8,6 +8,8 @@ has 'key'       => ( is => 'ro', isa => 'Str',             required => 1 );
 has 'acl_short' => ( is => 'ro', isa => 'Maybe[AclShort]', required => 0 );
 has 'acl_xml'   => ( is => 'ro', isa => 'Maybe[Str]',      required => 0 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self = shift;
 

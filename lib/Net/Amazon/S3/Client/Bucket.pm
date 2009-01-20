@@ -11,6 +11,8 @@ has 'creation_date' =>
 has 'owner_id'           => ( is => 'ro', isa => 'OwnerId', required => 0 );
 has 'owner_display_name' => ( is => 'ro', isa => 'Str',     required => 0 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub _create {
     my ( $self, %conf ) = @_;
 

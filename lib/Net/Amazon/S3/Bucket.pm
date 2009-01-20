@@ -9,6 +9,8 @@ has 'account' => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 has 'bucket'  => ( is => 'ro', isa => 'Str',             required => 1 );
 has 'creation_date' => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
 
+__PACKAGE__->meta->make_immutable;
+
 =head1 NAME
 
 Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets

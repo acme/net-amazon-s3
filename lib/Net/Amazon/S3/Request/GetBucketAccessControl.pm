@@ -5,6 +5,8 @@ extends 'Net::Amazon::S3::Request';
 
 has 'bucket' => ( is => 'ro', isa => 'BucketName', required => 1 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self = shift;
 

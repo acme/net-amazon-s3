@@ -3,6 +3,8 @@ use Moose;
 use MooseX::StrictConstructor;
 extends 'Net::Amazon::S3::Request';
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self    = shift;
     return Net::Amazon::S3::HTTPRequest->new(

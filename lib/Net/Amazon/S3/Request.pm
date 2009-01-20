@@ -40,6 +40,8 @@ subtype 'BucketName' => as 'BucketName3' => where {
 
 has 's3' => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub _uri {
     my ( $self, $key ) = @_;
     return ($key)

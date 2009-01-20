@@ -10,6 +10,8 @@ has 'acl_short' => ( is => 'ro', isa => 'Maybe[AclShort]', required => 0 );
 has 'headers' =>
     ( is => 'ro', isa => 'HashRef', required => 0, default => sub { {} } );
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self    = shift;
     my $headers = $self->headers;

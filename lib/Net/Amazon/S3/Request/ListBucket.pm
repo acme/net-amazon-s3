@@ -11,6 +11,8 @@ has 'max_keys' =>
     ( is => 'ro', isa => 'Maybe[Int]', required => 0, default => 1000 );
 has 'marker' => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub http_request {
     my $self = shift;
 

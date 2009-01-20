@@ -32,6 +32,8 @@ has 'content_type' => (
     default  => 'binary/octet-stream'
 );
 
+__PACKAGE__->meta->make_immutable;
+
 sub get {
     my $self = shift;
 

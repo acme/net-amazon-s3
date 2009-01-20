@@ -1,6 +1,7 @@
 package Net::Amazon::S3::Client::Object;
 use Moose;
 use MooseX::StrictConstructor;
+use DateTime::Format::HTTP;
 use DateTime::Format::ISO8601;
 use Digest::MD5 qw(md5 md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);
@@ -19,6 +20,8 @@ has 'key'  => ( is => 'ro', isa => 'Str',  required => 1 );
 has 'etag' => ( is => 'ro', isa => 'Etag', required => 0 );
 has 'size' => ( is => 'ro', isa => 'Int',  required => 0 );
 has 'last_modified' =>
+    ( is => 'ro', isa => 'DateTime', coerce => 1, required => 0 );
+has 'expires' =>
     ( is => 'ro', isa => 'DateTime', coerce => 1, required => 0 );
 has 'acl_short' =>
     ( is => 'ro', isa => 'AclShort', required => 0, default => 'private' );
@@ -89,6 +92,11 @@ sub put {
         'Content-Type'   => $self->content_type,
     };
 
+    if ( $self->expires ) {
+        $conf->{Expires}
+            = DateTime::Format::HTTP->format_datetime( $self->expires );
+    }
+
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,
         bucket    => $self->bucket->name,
@@ -126,6 +134,11 @@ sub put_filename {
         'Content-Length' => $size,
         'Content-Type'   => $self->content_type,
     };
+
+    if ( $self->expires ) {
+        $conf->{Expires}
+            = DateTime::Format::HTTP->format_datetime( $self->expires );
+    }
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,
@@ -251,11 +264,12 @@ Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
   $object->delete;
 
   # to create a new object which is publically-accessible with a
-  # content-type of text/plain
+  # content-type of text/plain which expires on 2010-01-02
   my $object = $bucket->object(
     key          => 'this is the public key',
     acl_short    => 'public-read',
     content_type => 'text/plain',
+    expires      => '2010-01-02',
   );
   $object->put('this is the public value');
 

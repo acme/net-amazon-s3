@@ -11,6 +11,8 @@ WriteMakefile(
     PREREQ_PM    => {
         'Class::Accessor::Fast'        => '0',
         'Data::Stream::Bulk::Callback' => '0',
+        'DateTime::Format::HTTP'       => '0',
+        'DateTime::Format::ISO8601'    => '0',
         'Digest::HMAC_SHA1'            => '0',
         'Digest::MD5'                  => '0',
         'Digest::MD5::File'            => '0',

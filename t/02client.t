@@ -11,7 +11,7 @@ use Test::Exception;
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
 } else {
-    plan tests => 33;
+    plan tests => 34;
 }
 
 use_ok('Net::Amazon::S3');
@@ -23,7 +23,6 @@ my $s3 = Net::Amazon::S3->new(
     aws_access_key_id     => $aws_access_key_id,
     aws_secret_access_key => $aws_secret_access_key,
     retry                 => 1,
-
 );
 
 my $readme_size   = stat('README')->size;
@@ -131,11 +130,11 @@ is( $bucket->object( key => 'this is the key' )->get,
 $object->delete;
 
 # upload a public object
-
 $object = $bucket->object(
     key          => 'this is the public key',
     acl_short    => 'public-read',
     content_type => 'text/plain',
+    expires      => '2001-02-03',
 );
 $object->put('this is the public value');
 is( get( $object->uri ),
@@ -144,6 +143,9 @@ is( get( $object->uri ),
 );
 is( ( head( $object->uri ) )[0],
     'text/plain', 'newly created public object has the right content type' );
+is( ( head( $object->uri ) )[3],
+    $object->expires->epoch,
+    'newly created public object has the right expires' );
 $object->delete;
 
 # delete a non-existant object

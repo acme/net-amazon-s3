@@ -19,6 +19,16 @@ sub http_request {
     )->http_request;
 }
 
+sub query_string_authentication_uri {
+    my ( $self, $expires ) = @_;
+
+    return Net::Amazon::S3::HTTPRequest->new(
+        s3     => $self->s3,
+        method => $self->method,
+        path   => $self->_uri( $self->key ),
+    )->query_string_authentication_uri($expires);
+}
+
 1;
 
 __END__
@@ -45,4 +55,8 @@ This module gets an object.
 =head2 http_request
 
 This method returns a HTTP::Request object.
+
+=head2 query_string_authentication_uri
+
+This method returns query string authentication URI.
 

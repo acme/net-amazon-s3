@@ -11,7 +11,7 @@ use Test::Exception;
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
 } else {
-    plan tests => 34;
+    plan tests => 36;
 }
 
 use_ok('Net::Amazon::S3');
@@ -125,6 +125,16 @@ is( $object->get,
 is( $bucket->object( key => 'this is the key' )->get,
     'this is the value',
     'newly created object fetched by name has the right value'
+);
+
+is( get( $object->uri ),
+    undef, 'newly created object cannot be fetched by uri' );
+
+$object->expires('2037-01-01');
+
+is( get( $object->query_string_authentication_uri() ),
+    'this is the value',
+    'newly created object can be fetch by authentication uri'
 );
 
 $object->delete;

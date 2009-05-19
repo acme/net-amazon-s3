@@ -1,5 +1,9 @@
 Revision history for Perl module Net::Amazon::S3:
 
+0.51
+    - use MooseX::Types::DateTimeX so that we work with latest Moose
+      (noticed by Ted Zlatanov)
+
 0.50 Wed Jan 21 10:42:00 GMT 2009
     - add support for an expires header when putting an object to
       Net::Amazon::S3::Client::Object

@@ -2,12 +2,12 @@ package Net::Amazon::S3::Client::Object;
 use Moose;
 use MooseX::StrictConstructor;
 use DateTime::Format::HTTP;
-use DateTime::Format::ISO8601;
 use Digest::MD5 qw(md5 md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);
 use File::stat;
 use MIME::Base64;
 use Moose::Util::TypeConstraints;
+use MooseX::Types::DateTimeX qw( DateTime );
 
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
@@ -20,9 +20,8 @@ has 'key'  => ( is => 'ro', isa => 'Str',  required => 1 );
 has 'etag' => ( is => 'ro', isa => 'Etag', required => 0 );
 has 'size' => ( is => 'ro', isa => 'Int',  required => 0 );
 has 'last_modified' =>
-    ( is => 'ro', isa => 'DateTime', coerce => 1, required => 0 );
-has 'expires' =>
-    ( is => 'rw', isa => 'DateTime', coerce => 1, required => 0 );
+    ( is => 'ro', isa => DateTime, coerce => 1, required => 0 );
+has 'expires' => ( is => 'rw', isa => DateTime, coerce => 1, required => 0 );
 has 'acl_short' =>
     ( is => 'ro', isa => 'AclShort', required => 0, default => 'private' );
 has 'content_type' => (

@@ -1,13 +1,8 @@
 package Net::Amazon::S3::Client;
 use Moose;
-use DateTime::Format::ISO8601;
 use HTTP::Status qw(is_error status_message);
 use MooseX::StrictConstructor;
 use Moose::Util::TypeConstraints;
-
-type 'DateTime' => where { $_->isa('DateTime') };
-coerce 'DateTime' => from 'Str' =>
-    via { DateTime::Format::ISO8601->parse_datetime($_) };
 
 type 'Etag' => where { $_ =~ /^[a-z0-9]{32}$/ };
 

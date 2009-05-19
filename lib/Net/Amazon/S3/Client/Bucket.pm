@@ -2,12 +2,13 @@ package Net::Amazon::S3::Client::Bucket;
 use Moose;
 use MooseX::StrictConstructor;
 use Data::Stream::Bulk::Callback;
+use MooseX::Types::DateTimeX qw( DateTime );
 
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );
 has 'name' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'creation_date' =>
-    ( is => 'ro', isa => 'DateTime', coerce => 1, required => 0 );
+    ( is => 'ro', isa => DateTime, coerce => 1, required => 0 );
 has 'owner_id'           => ( is => 'ro', isa => 'OwnerId', required => 0 );
 has 'owner_display_name' => ( is => 'ro', isa => 'Str',     required => 0 );
 

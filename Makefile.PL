@@ -24,6 +24,7 @@ WriteMakefile(
         'MIME::Base64'                 => '0',
         'Moose'                        => '0',
         'MooseX::StrictConstructor'    => '0',
+        'MooseX::Types::DateTimeX'     => '0',
         'Test::More'                   => '0.01',
         'Regexp::Common'               => '0',
         'XML::LibXML'                  => '0',

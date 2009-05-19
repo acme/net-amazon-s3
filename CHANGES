@@ -1,6 +1,6 @@
 Revision history for Perl module Net::Amazon::S3:
 
-0.51
+0.51 Tue May 19 08:31:59 BST 2009
     - use MooseX::Types::DateTimeX so that we work with latest Moose
       (noticed by Ted Zlatanov)
 

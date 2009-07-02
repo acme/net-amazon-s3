@@ -142,7 +142,7 @@ has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 
 my $KEEP_ALIVE_CACHESIZE = 10;
 

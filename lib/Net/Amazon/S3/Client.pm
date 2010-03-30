@@ -68,10 +68,16 @@ sub bucket {
     );
 }
 
+sub _send_request_raw {
+    my ( $self, $http_request, $filename ) = @_;
+
+    return $self->s3->ua->request( $http_request, $filename );
+}
+
 sub _send_request {
     my ( $self, $http_request, $filename ) = @_;
 
-    my $http_response = $self->s3->ua->request( $http_request, $filename );
+    my $http_response = $self->_send_request_raw( $http_request, $filename );
 
     my $content      = $http_response->content;
     my $content_type = $http_response->content_type;

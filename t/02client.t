@@ -11,7 +11,7 @@ use Test::Exception;
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
 } else {
-    plan tests => 36;
+    plan tests => 38;
 }
 
 use_ok('Net::Amazon::S3');
@@ -76,7 +76,12 @@ until ( $stream->is_done ) {
 is( $count, 0, 'newly created bucket has no objects' );
 
 my $object = $bucket->object( key => 'this is the key' );
+
+ok( !$object->exists, 'object does not exist yet' );
+
 $object->put('this is the value');
+
+ok( $object->exists, 'object now exists yet' );
 
 my @objects;
 

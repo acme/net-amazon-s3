@@ -33,6 +33,20 @@ has 'content_type' => (
 
 __PACKAGE__->meta->make_immutable;
 
+sub exists {
+    my $self = shift;
+
+    my $http_request = Net::Amazon::S3::Request::GetObject->new(
+        s3     => $self->client->s3,
+        bucket => $self->bucket->name,
+        key    => $self->key,
+        method => 'HEAD',
+    )->http_request;
+
+    my $http_response = $self->client->_send_request_raw($http_request);
+    return $http_response->code == 200 ? 1 : 0;
+}
+
 sub get {
     my $self = shift;
 
@@ -271,6 +285,9 @@ Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
   # to get the vaue of an object
   my $value = $object->get;
 
+  # to see if an object exists
+  if ($object->exists) { ... }
+
   # to delete an object
   $object->delete;
 
@@ -330,6 +347,11 @@ This module represents objects in buckets.
 
   # to delete an object
   $object->delete;
+
+=head2 exists
+
+  # to see if an object exists
+  if ($object->exists) { ... }
 
 =head2 get
 

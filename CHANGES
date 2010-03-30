@@ -3,6 +3,7 @@ Revision history for Perl module Net::Amazon::S3:
 0.53
     - fix authenticated urls to work with EU buckets (patch by Edmund
       von der Burg)
+    - tiny POD fix (patch by Frank Wiegand)
 
 0.52 Thu Jul  2 09:17:11 BST 2009
     - increase version prerequisites for some modules so that they

@@ -383,7 +383,7 @@ Delete the current bucket object from the server. Takes no arguments.
 
 Fails if the bucket has anything in it.
 
-This is an alias for C<$s3->delete_bucket($bucket)>
+This is an alias for C<< $s3->delete_bucket($bucket) >>
 
 =cut
 

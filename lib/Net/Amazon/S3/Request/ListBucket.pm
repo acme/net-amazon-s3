@@ -22,7 +22,9 @@ sub http_request {
     foreach my $method qw(prefix delimiter max_keys marker) {
         my $value = $self->$method;
         next unless $value;
-        push @post, $method . "=" . $self->_urlencode($value);
+        my $key = $method;
+        $key = 'max-keys' if $method eq 'max_keys';
+        push @post, $key . "=" . $self->_urlencode($value);
     }
     if (@post) {
         $path .= '?' . join( '&', @post );

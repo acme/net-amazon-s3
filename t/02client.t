@@ -146,10 +146,11 @@ $object->delete;
 
 # upload a public object
 $object = $bucket->object(
-    key          => 'this is the public key',
-    acl_short    => 'public-read',
-    content_type => 'text/plain',
-    expires      => '2001-02-03',
+    key              => 'this is the public key',
+    acl_short        => 'public-read',
+    content_type     => 'text/plain',
+    content_encoding => 'identity',
+    expires          => '2001-02-03',
 );
 $object->put('this is the public value');
 is( get( $object->uri ),

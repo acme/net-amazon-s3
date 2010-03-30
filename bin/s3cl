@@ -4,22 +4,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Path::Class;
-
-# TODO: read key_id and secret from config file?
-# use AppConfig;
-
-# TODO: probably nicer to put all of this in Net::Amazon::S3::CommandLine
-# and have simple call to that from here.
-
-my $aws_access_key_id     = $ENV{'AWS_ACCESS_KEY_ID'};
-my $aws_secret_access_key = $ENV{'AWS_ACCESS_KEY_SECRET'};
-
-my $s3 = Net::Amazon::S3->new(
-    {   aws_access_key_id     => $aws_access_key_id,
-        aws_secret_access_key => $aws_secret_access_key,
-        retry                 => 1,
-    }
-);
+use Net::Amazon::S3;
 
 =head1 NAME
 
@@ -30,6 +15,7 @@ s3cl - Command line for Amazon s3 cloud storage
 s3cl command [options] 
 
   s3cl buckets
+  s3cl mkbucket --bucket some_bucket_name --jurisdiction [EU|US]
   s3cl ls <bucket>:[prefix]
   s3cl cp <bucket>:<key> /path/[filename]
   s3cl sync <bucket>:[prefix] /path/
@@ -42,6 +28,11 @@ s3cl command [options]
  We take NO responsibility for the costs incured through using
  this script.
 
+ To run this script, you need to set a pair of environment variables:
+
+ AWS_ACCESS_KEY_ID
+ AWS_ACCESS_KEY_SECRET
+
 =head1 DESCRIPTION
 
 This program gives a command line interface to Amazons s3 storage
@@ -53,26 +44,50 @@ for your bill.
 
 =cut
 
+my $s3;
+
 my %args;
 
 my %commands = (
-    buckets => \&buckets,
-    ls      => \&ls,
-    rm      => \&rm,
-    cp      => \&cp,
-    sync    => \&sync,
-    help    => \&helper,
+    mkbucket => \&mk_bucket,
+    buckets  => \&buckets,
+    ls       => \&ls,
+    rm       => \&rm,
+    cp       => \&cp,
+    sync     => \&sync,
+    help     => \&helper,
 );
 
-terminal();
-get_options();
 main();
 
 sub main {
+    terminal();
+    get_options();
+    init_s3();
+
     my $command = shift @ARGV || "help";
     $commands{$command}
         or helper("Unknown command: $command");
     $commands{$command}->();
+}
+
+sub init_s3 {
+
+    # TODO: read key_id and secret from config file?
+    # use AppConfig;
+
+    # TODO: probably nicer to put all of this in Net::Amazon::S3::CommandLine
+    # and have simple call to that from here.
+
+    my $aws_access_key_id     = $ENV{'AWS_ACCESS_KEY_ID'};
+    my $aws_secret_access_key = $ENV{'AWS_ACCESS_KEY_SECRET'};
+
+    $s3 = Net::Amazon::S3->new(
+        {   aws_access_key_id     => $aws_access_key_id,
+            aws_secret_access_key => $aws_secret_access_key,
+            retry                 => 1,
+        }
+    );
 }
 
 sub sync {
@@ -157,6 +172,15 @@ sub rm {
     }
 }
 
+sub mk_bucket {
+    my $bucketname = $args{bucket};
+    my $bucket
+        = $s3->add_bucket(
+        { bucket => $bucketname, location_constraint => 'EU' } )
+        or die $s3->err . ": " . $s3->errstr;
+
+}
+
 sub buckets {
     my $response = $s3->buckets;
     my $num = scalar @{ $response->{buckets} || [] };
@@ -179,11 +203,13 @@ sub terminal {
 
 # TODO: Replace with AppConfig this is ick!
 sub get_options {
-    my $help  = 0;
-    my $man   = 0;
-    my $force = 0;
+    my $help   = 0;
+    my $man    = 0;
+    my $force  = 0;
+    my $loc    = "US";
+    my $bucket = "";
     GetOptions(
-        \%args, "bucket=s",
+        \%args, "bucket=s", "jurisdiction=s",
         "f|force"  => \$force,
         "h|help|?" => \$help,
         "man"      => \$man,
@@ -234,6 +260,13 @@ __DATA__
 s3cl buckets
 
 List all buckets for this account.
+
+=item B<mkbucket>
+
+s3cl mkbucket --bucket sombucketname [--jurisdiction [EU|US]]
+
+Create a new bucket, optionally specifying what jurisdiction
+it should be created in.
 
 =item B<ls>
 

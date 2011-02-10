@@ -760,7 +760,7 @@ sub _xpc_of_content {
     # warn $doc->toString(1);
 
     my $xpc = XML::LibXML::XPathContext->new($doc);
-    $xpc->registerNs( 's3', 'http://s3.amazonaws.com/doc/2006-03-01/' );
+    $xpc->registerNs( 's3', 'http://doc.s3.amazonaws.com/2006-03-01' );
 
     return $xpc;
 }

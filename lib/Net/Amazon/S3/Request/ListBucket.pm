@@ -19,7 +19,7 @@ sub http_request {
     my $path = $self->bucket . "/";
 
     my @post;
-    foreach my $method qw(prefix delimiter max_keys marker) {
+    foreach my $method ( qw(prefix delimiter max_keys marker) ) {
         my $value = $self->$method;
         next unless $value;
         my $key = $method;

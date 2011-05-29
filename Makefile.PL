@@ -10,7 +10,6 @@ WriteMakefile(
     LICENSE      => 'perl',
     PREREQ_PM    => {
         'Class::MOP'                 => '0.88',
-        'Class::Accessor::Fast'      => '0',
         'Data::Stream::Bulk'         => '0.06',
         'DateTime::Format::HTTP'     => '0',
         'DateTime::Format::ISO8601'  => '0',

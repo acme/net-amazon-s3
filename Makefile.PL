@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME         => 'Net::Amazon::S3',
     VERSION_FROM => 'lib/Net/Amazon/S3.pm',
-    AUTHOR       => 'Leon Brocard <acme@astray.com>',
+    AUTHOR       => [ 'Leon Brocard <acme@astray.com>', 'Pedro Figueiredo <me@pedrofigueiredo.org>' ],
     ABSTRACT     => 'Use the Amazon S3 - Simple Storage Service',
     LICENSE      => 'perl',
     PREREQ_PM    => {

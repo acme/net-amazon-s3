@@ -1,10 +1,11 @@
 --- #YAML:1.0
 name:                Net-Amazon-S3
-version:             0.45
+version:             0.54
 abstract:            Use the Amazon S3 - Simple Storage Service
 license:             perl
 author:              
     - Leon Brocard <acme@astray.com>
+    - Pedro Figueiredo <me@pedrofigueiredo.org>
 generated_by:        ExtUtils::MakeMaker version 6.44
 distribution_type:   module
 requires:     

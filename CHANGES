@@ -1,5 +1,11 @@
 Revision history for Perl module Net::Amazon::S3:
 
+0.54 Sat Mar 21 21:23:32 BST 2011
+    - Fix for a naked qw() warning (patch by David Wheeler)
+    - Fixed path issues (patch by Pavel Karoukin)
+      *WARNING* THIS MIGHT BREAK EXISTING APPS *WARNING*
+    - Author and development information changes
+
 0.53 Tue Mar 30 15:24:19 BST 2010
     - fix authenticated urls to work with EU buckets (patch by Edmund
       von der Burg)

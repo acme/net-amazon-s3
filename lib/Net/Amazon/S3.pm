@@ -99,7 +99,9 @@ in buckets. Bucket names are global.
 Note: This is the legacy interface, please check out
 L<Net::Amazon::S3::Client> instead.
 
-Development of this code happens here: http://github.com/acme/net-amazon-s3
+Development of this code happens here: http://github.com/pfig/net-amazon-s3/
+
+Homepage for the project (just started) is at http://pfig.github.com/net-amazon-s3/
 
 =cut
 
@@ -142,7 +144,7 @@ has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 
 my $KEEP_ALIVE_CACHESIZE = 10;
 
@@ -837,6 +839,8 @@ on a shared system might leak that information to another user. Be careful.
 Leon Brocard <acme@astray.com> and unknown Amazon Digital Services programmers.
 
 Brad Fitzpatrick <brad@danga.com> - return values, Bucket object
+
+Pedro Figueiredo <me@pedrofigueiredo.org> - since 0.54
 
 =head1 SEE ALSO
 

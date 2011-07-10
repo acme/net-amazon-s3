@@ -93,8 +93,11 @@ DESCRIPTION
     Net::Amazon::S3::Client instead.
 
     Development of this code happens here:
-    http://github.com/acme/net-amazon-s3
-
+    http://github.com/pfig/net-amazon-s3
+    
+    Homepage for the project (just started) is at
+    http://pfig.github.com/net-amazon-s3/
+    
 METHODS
   new
     Create a new S3 client object. Takes some arguments:
@@ -329,6 +332,8 @@ AUTHOR
     programmers.
 
     Brad Fitzpatrick <brad@danga.com> - return values, Bucket object
+    
+    Pedro Figueiredo <me@pedrofigueiredo.org> - since 0.54
 
 SEE ALSO
     Net::Amazon::S3::Bucket

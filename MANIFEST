@@ -27,4 +27,3 @@ t/01api.t
 t/02client.t
 t/99-pod-coverage.t
 t/99-pod.t
-META.yml                                 Module meta-data (added by MakeMaker)

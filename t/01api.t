@@ -32,11 +32,11 @@ $OWNER_ID          = $response->{owner_id};
 $OWNER_DISPLAYNAME = $response->{owner_displayname};
 
 TODO: {
-    local $TODO = "These tests only work if you're leon";
+    local $TODO = "These tests only work if you're pedro";
 
-    like( $response->{owner_id}, qr/^46a801915a1711f/ );
-    is( $response->{owner_displayname},   '_acme_' );
-    is( scalar @{ $response->{buckets} }, 9 );
+    like( $response->{owner_id}, qr/^c7483d612ac7f0c0/ );
+    is( $response->{owner_displayname},   'pedro_figueiredo' );
+    is( scalar @{ $response->{buckets} }, 6 );
 }
 
 for my $location ( undef, 'EU' ) {

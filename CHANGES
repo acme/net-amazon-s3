@@ -1,5 +1,9 @@
 Revision history for Perl module Net::Amazon::S3:
 
+0.55 Sat Dec 10 00:55:29 GMT 2011
+    - Replaced dependency on MooseX::Types::DateTimeX with
+      MooseX::Types::DateTime::MoreCoercions (RT #72472).
+
 0.54 Sat Mar 21 21:23:32 BST 2011
     - Fix for a naked qw() warning (patch by David Wheeler)
     - Fixed path issues (patch by Pavel Karoukin)

@@ -2,7 +2,7 @@ package Net::Amazon::S3::Client::Bucket;
 use Moose;
 use MooseX::StrictConstructor;
 use Data::Stream::Bulk::Callback;
-use MooseX::Types::DateTimeX qw( DateTime );
+use MooseX::Types::DateTime::MoreCoercions qw( DateTime );
 
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );

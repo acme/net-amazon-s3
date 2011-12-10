@@ -24,12 +24,12 @@ WriteMakefile(
         'MIME::Base64'               => '0',
         'Moose'                      => '0.85',
         'MooseX::StrictConstructor'  => '0.08',
-        'MooseX::Types::DateTimeX'   => '0',
         'Test::More'                 => '0.01',
         'Regexp::Common'             => '0',
         'XML::LibXML'                => '0',
         'XML::LibXML::XPathContext'  => '0',
         'URI::Escape'                => '0',
+        'MooseX::Types::DateTime::MoreCoercions' => '0.07',
     }
 );
 

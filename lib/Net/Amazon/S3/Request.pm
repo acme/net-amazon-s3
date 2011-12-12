@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Request;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 use Moose::Util::TypeConstraints;
 use Regexp::Common qw /net/;
 

@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Request::SetObjectAccessControl;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 extends 'Net::Amazon::S3::Request';
 
 has 'bucket'    => ( is => 'ro', isa => 'BucketName',      required => 1 );

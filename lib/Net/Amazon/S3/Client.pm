@@ -1,7 +1,7 @@
 package Net::Amazon::S3::Client;
-use Moose;
+use Moose 0.85;
 use HTTP::Status qw(is_error status_message);
-use MooseX::StrictConstructor;
+use MooseX::StrictConstructor 0.08;
 use Moose::Util::TypeConstraints;
 
 type 'Etag' => where { $_ =~ /^[a-z0-9]{32}$/ };

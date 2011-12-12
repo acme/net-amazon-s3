@@ -1,13 +1,14 @@
 package Net::Amazon::S3::Client::Object;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 use DateTime::Format::HTTP;
 use Digest::MD5 qw(md5 md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);
 use File::stat;
 use MIME::Base64;
 use Moose::Util::TypeConstraints;
-use MooseX::Types::DateTime::MoreCoercions qw( DateTime );
+use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
+use IO::File 1.14;
 
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);

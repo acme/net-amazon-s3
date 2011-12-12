@@ -1,9 +1,9 @@
 package Net::Amazon::S3::Bucket;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 use Carp;
 use File::stat;
-use IO::File;
+use IO::File 1.14;
 
 has 'account' => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 has 'bucket'  => ( is => 'ro', isa => 'Str',             required => 1 );

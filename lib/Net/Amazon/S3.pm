@@ -1,6 +1,6 @@
 package Net::Amazon::S3;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 
 =head1 NAME
 

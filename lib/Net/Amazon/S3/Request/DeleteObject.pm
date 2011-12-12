@@ -1,5 +1,5 @@
 package Net::Amazon::S3::Request::DeleteObject;
-use Moose;
+use Moose 0.85;
 use Moose::Util::TypeConstraints;
 extends 'Net::Amazon::S3::Request';
 

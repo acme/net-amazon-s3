@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Request::ListAllMyBuckets;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.08;
 extends 'Net::Amazon::S3::Request';
 
 __PACKAGE__->meta->make_immutable;

@@ -1,6 +1,6 @@
 package Net::Amazon::S3::HTTPRequest;
 use Moose 0.85;
-use MooseX::StrictConstructor 0.08;
+use MooseX::StrictConstructor 0.16;
 use HTTP::Date;
 use MIME::Base64 qw(encode_base64);
 use Moose::Util::TypeConstraints;

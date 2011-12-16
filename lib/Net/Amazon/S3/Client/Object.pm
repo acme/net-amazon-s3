@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Client::Object;
 use Moose 0.85;
-use MooseX::StrictConstructor 0.08;
+use MooseX::StrictConstructor 0.16;
 use DateTime::Format::HTTP;
 use Digest::MD5 qw(md5 md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);

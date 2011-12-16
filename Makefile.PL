@@ -23,7 +23,7 @@ WriteMakefile(
         'LWP::UserAgent::Determined' => '0',
         'MIME::Base64'               => '0',
         'Moose'                      => '0.85',
-        'MooseX::StrictConstructor'  => '0.08',
+        'MooseX::StrictConstructor'  => '0.16',
         'Test::More'                 => '0.01',
         'Regexp::Common'             => '0',
         'XML::LibXML'                => '0',

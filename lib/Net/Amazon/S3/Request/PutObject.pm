@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Request::PutObject;
 use Moose 0.85;
-use MooseX::StrictConstructor 0.08;
+use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';
 
 has 'bucket'    => ( is => 'ro', isa => 'BucketName',      required => 1 );

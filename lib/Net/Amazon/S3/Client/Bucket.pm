@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Client::Bucket;
 use Moose 0.85;
-use MooseX::StrictConstructor 0.08;
+use MooseX::StrictConstructor 0.16;
 use Data::Stream::Bulk::Callback;
 use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
 

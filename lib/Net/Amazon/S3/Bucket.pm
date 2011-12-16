@@ -1,6 +1,6 @@
 package Net::Amazon::S3::Bucket;
 use Moose 0.85;
-use MooseX::StrictConstructor 0.08;
+use MooseX::StrictConstructor 0.16;
 use Carp;
 use File::stat;
 use IO::File 1.14;

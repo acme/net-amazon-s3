@@ -2,8 +2,9 @@ package Net::Amazon::S3::HTTPRequest;
 use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 use HTTP::Date;
-use MIME::Base64 qw(encode_base64);
+use MIME::Base64 qw( encode_base64 );
 use Moose::Util::TypeConstraints;
+use URI::Escape qw( uri_escape_utf8 );
 use URI::QueryParam;
 
 my $METADATA_PREFIX      = 'x-amz-meta-';

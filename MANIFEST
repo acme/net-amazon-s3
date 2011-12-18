@@ -23,7 +23,9 @@ lib/Net/Amazon/S3/Request/SetObjectAccessControl.pm
 Makefile.PL
 MANIFEST			This list of files
 README
+t/00use.t
 t/01api.t
 t/02client.t
 t/99-pod-coverage.t
 t/99-pod.t
+t/README

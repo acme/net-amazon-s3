@@ -28,4 +28,3 @@ t/01api.t
 t/02client.t
 t/99-pod-coverage.t
 t/99-pod.t
-t/README

@@ -7,6 +7,8 @@ has 'bucket' => ( is => 'ro', isa => 'BucketName', required => 1 );
 has 'key'    => ( is => 'ro', isa => 'Str',        required => 1 );
 has 'method' => ( is => 'ro', isa => 'HTTPMethod', required => 1 );
 
+# ABSTRACT: An internal class to get an object
+
 __PACKAGE__->meta->make_immutable;
 
 sub http_request {
@@ -32,10 +34,6 @@ sub query_string_authentication_uri {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request::GetObject - An internal class to get an object
 
 =head1 SYNOPSIS
 

@@ -4,6 +4,8 @@ use HTTP::Status qw(is_error status_message);
 use MooseX::StrictConstructor 0.16;
 use Moose::Util::TypeConstraints;
 
+# ABSTRACT: An easy-to-use Amazon S3 client
+
 type 'Etag' => where { $_ =~ /^[a-z0-9]{32}$/ };
 
 type 'OwnerId' => where { $_ =~ /^[a-z0-9]{64}$/ };
@@ -125,10 +127,6 @@ sub _send_request_xpc {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Client - An easy-to-use Amazon S3 client
-
 =head1 SYNOPSIS
 
   my $s3 = Net::Amazon::S3->new(
@@ -161,8 +159,8 @@ Net::Amazon::S3::Client - An easy-to-use Amazon S3 client
 
 The L<Net::Amazon::S3> module was written when the Amazon S3 service
 had just come out and it is a light wrapper around the APIs. Some
-bad API decisions were also made. The 
-L<Net::Amazon::S3::Client>, L<Net::Amazon::S3::Client::Bucket> and 
+bad API decisions were also made. The
+L<Net::Amazon::S3::Client>, L<Net::Amazon::S3::Client::Bucket> and
 L<Net::Amazon::S3::Client::Object> classes are designed after years
 of usage to be easy to use for common tasks.
 

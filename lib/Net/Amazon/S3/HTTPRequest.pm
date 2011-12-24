@@ -7,6 +7,8 @@ use Moose::Util::TypeConstraints;
 use URI::Escape qw( uri_escape_utf8 );
 use URI::QueryParam;
 
+# ABSTRACT: Create a signed HTTP::Request
+
 my $METADATA_PREFIX      = 'x-amz-meta-';
 my $AMAZON_HEADER_PREFIX = 'x-amz-';
 
@@ -218,10 +220,6 @@ sub _urlencode {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::HTTPRequest - Create a signed HTTP::Request
 
 =head1 SYNOPSIS
 

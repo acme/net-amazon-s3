@@ -1,5 +1,7 @@
 Revision history for Perl module Net::Amazon::S3:
 
+{{$NEXT}}
+
 0.56 Sun Dec 18 22:22:32 GMT 2011
     - Spelling error (RT #69817, patch from Fabrizio Regalli)
     - Added use_ok tests (RT #72856, suggested by Gregor Herrmann)

@@ -11,9 +11,7 @@ has 'creation_date' => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
-=head1 NAME
-
-Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets
+# ABSTRACT: convenience object for working with Amazon S3 buckets
 
 =head1 SYNOPSIS
 
@@ -56,7 +54,7 @@ Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets
 
   # delete the entire bucket (Amazon requires it first be empty)
   $bucket->delete_bucket;
- 
+
 =head1 DESCRIPTION
 
 This module represents an S3 bucket.  You get a bucket object
@@ -336,7 +334,7 @@ sub get_key {
 
 =head2 get_key_filename $key_name $method $filename
 
-Use this to download large files from S3. Takes a key name and an optional 
+Use this to download large files from S3. Takes a key name and an optional
 HTTP method (which defaults to C<GET>. Fetches the key from AWS and writes
 it to the filename. THe value returned will be empty.
 
@@ -379,7 +377,7 @@ sub delete_key {
 
 =head2 delete_bucket
 
-Delete the current bucket object from the server. Takes no arguments. 
+Delete the current bucket object from the server. Takes no arguments.
 
 Fails if the bucket has anything in it.
 

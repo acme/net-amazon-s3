@@ -3,6 +3,8 @@ use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';
 
+# ABSTRACT: An internal class to list all buckets
+
 __PACKAGE__->meta->make_immutable;
 
 sub http_request {
@@ -17,10 +19,6 @@ sub http_request {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request::ListAllMyBuckets - An internal class to list all buckets
 
 =head1 SYNOPSIS
 

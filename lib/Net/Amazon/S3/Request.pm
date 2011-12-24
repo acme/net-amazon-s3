@@ -4,6 +4,8 @@ use MooseX::StrictConstructor 0.16;
 use Moose::Util::TypeConstraints;
 use Regexp::Common qw /net/;
 
+# ABSTRACT: Base class for request objects
+
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
 enum 'LocationConstraint' => ( 'US', 'EU' );
@@ -52,10 +54,6 @@ sub _uri {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request - Base class for request objects
 
 =head1 SYNOPSIS
 

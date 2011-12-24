@@ -4,6 +4,8 @@ use MooseX::StrictConstructor 0.16;
 use URI::Escape qw(uri_escape_utf8);
 extends 'Net::Amazon::S3::Request';
 
+# ABSTRACT: An internal class to list a bucket
+
 has 'bucket'    => ( is => 'ro', isa => 'BucketName', required => 1 );
 has 'prefix'    => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
 has 'delimiter' => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
@@ -45,10 +47,6 @@ sub _urlencode {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request::ListBucket - An internal class to list a bucket
 
 =head1 SYNOPSIS
 

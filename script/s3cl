@@ -6,13 +6,12 @@ use Pod::Usage;
 use Path::Class;
 use Net::Amazon::S3;
 
-=head1 NAME
-
-s3cl - Command line for Amazon s3 cloud storage
+# PODNAME: s3cl
+# ABSTRACT: Command line for Amazon s3 cloud storage
 
 =head1 SYNOPSIS
 
-s3cl command [options] 
+s3cl command [options]
 
   s3cl buckets
   s3cl mkbucket --bucket some_bucket_name --jurisdiction [EU|US]
@@ -290,15 +289,15 @@ the target_directory.
 s3cl sync <bucket>:[prefix] target_dir
 
 Downloads all files matching the prefix into a directory structure
-replicating that of the prefix and all 'sub-directories'. It will 
+replicating that of the prefix and all 'sub-directories'. It will
 download ALL files - even if already on your local disk:
 
 http://www.amazon.com/gp/browse.html?node=16427261
 
-  #  Data transfer "in" and "out" refers to transfer into and out 
-  #  of Amazon S3.  Data transferred between Amazon EC2 and  
-  #  Amazon S3, is free of charge (i.e., $0.00 per GB), except  
-  #  data transferred between Amazon EC2 and Amazon S3-Europe,  
+  #  Data transfer "in" and "out" refers to transfer into and out
+  #  of Amazon S3.  Data transferred between Amazon EC2 and
+  #  Amazon S3, is free of charge (i.e., $0.00 per GB), except
+  #  data transferred between Amazon EC2 and Amazon S3-Europe,
   #  which will be charged at regular rates.
 
 =item B<rm>
@@ -306,7 +305,7 @@ http://www.amazon.com/gp/browse.html?node=16427261
 s3cl rm <bucket>:<key>
 
 Remove a key(file) from the bucket, removing a non-existent file
-is not classed as an error. Once removed the key (file) can not 
+is not classed as an error. Once removed the key (file) can not
 be restored - so use with care!
 
 =back
@@ -316,13 +315,13 @@ be restored - so use with care!
 This module contains code modified from Amazon that contains the
 following notice (which is also applicicable to this code):
 
-  #  This software code is made available "AS IS" without 
-  #  warranties of any kind.  You may copy, display, modify and 
-  #  redistribute the software code either by itself or as incorporated 
-  #  into your code; provided that you do not remove any proprietary 
-  #  notices.  Your use of this software code is at your own risk and 
-  #  you waive any claim against Amazon Digital Services, Inc. or its 
-  #  affiliates with respect to your use of this software code. 
+  #  This software code is made available "AS IS" without
+  #  warranties of any kind.  You may copy, display, modify and
+  #  redistribute the software code either by itself or as incorporated
+  #  into your code; provided that you do not remove any proprietary
+  #  notices.  Your use of this software code is at your own risk and
+  #  you waive any claim against Amazon Digital Services, Inc. or its
+  #  affiliates with respect to your use of this software code.
   #  (c) 2006 Amazon Digital Services, Inc. or its affiliates.
 
 =head1 AUTHOR

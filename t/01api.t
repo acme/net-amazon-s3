@@ -255,7 +255,7 @@ for my $location ( undef, 'EU' ) {
 
     $response = $bucket_obj->get_key($keyname);
     is( $response->{content_type}, 'text/plain' );
-    like( $response->{value}, qr/and unknown Amazon/ );
+    like( $response->{value}, qr/Amazon Digital Services/ );
     is( $response->{etag},                $readme_md5 );
     is( $response->{'x-amz-meta-colour'}, 'orangy' );
     is( $response->{content_length},      $readme_size );

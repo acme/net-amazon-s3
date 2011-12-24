@@ -3,6 +3,8 @@ use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';
 
+# ABSTRACT: An internal class to put an object
+
 has 'bucket'    => ( is => 'ro', isa => 'BucketName',      required => 1 );
 has 'key'       => ( is => 'ro', isa => 'Str',             required => 1 );
 has 'value'     => ( is => 'ro', isa => 'Str|CodeRef',     required => 1 );
@@ -32,10 +34,6 @@ sub http_request {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request::PutObject - An internal class to put an object
 
 =head1 SYNOPSIS
 

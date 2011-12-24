@@ -4,6 +4,8 @@ use MooseX::StrictConstructor 0.16;
 use Data::Stream::Bulk::Callback;
 use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
 
+# ABSTRACT: An easy-to-use Amazon S3 client bucket
+
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );
 has 'name' => ( is => 'ro', isa => 'Str', required => 1 );
@@ -143,10 +145,6 @@ sub object {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Client::Bucket - An easy-to-use Amazon S3 client bucket
-
 =head1 SYNOPSIS
 
   # return the bucket name
@@ -159,7 +157,7 @@ Net::Amazon::S3::Client::Bucket - An easy-to-use Amazon S3 client bucket
   my $acl = $bucket->acl;
 
   # list objects in the bucket
-  # this returns a L<Data::Stream::Bulk> object which returns a 
+  # this returns a L<Data::Stream::Bulk> object which returns a
   # stream of L<Net::Amazon::S3::Client::Object> objects, as it may
   # have to issue multiple API requests
   my $stream = $bucket->list;
@@ -198,7 +196,7 @@ This module represents buckets.
 =head2 list
 
   # list objects in the bucket
-  # this returns a L<Data::Stream::Bulk> object which returns a 
+  # this returns a L<Data::Stream::Bulk> object which returns a
   # stream of L<Net::Amazon::S3::Client::Object> objects, as it may
   # have to issue multiple API requests
   my $stream = $bucket->list;

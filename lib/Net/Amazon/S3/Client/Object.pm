@@ -10,6 +10,8 @@ use Moose::Util::TypeConstraints;
 use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
 use IO::File 1.14;
 
+# ABSTRACT: An easy-to-use Amazon S3 client object
+
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
 
@@ -273,10 +275,6 @@ sub _etag {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
-
 =head1 SYNOPSIS
 
   # show the key
@@ -319,7 +317,7 @@ Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
   # upload a file
   my $object = $bucket->object(
     key          => 'images/my_hat.jpg',
-    content_type => 'image/jpeg', 
+    content_type => 'image/jpeg',
   );
   $object->put_filename('hat.jpg');
 
@@ -398,12 +396,12 @@ This module represents objects in buckets.
 
 You may also set Content-Encoding using content_encoding.
 
-=head2 put_filename 
+=head2 put_filename
 
   # upload a file
   my $object = $bucket->object(
     key          => 'images/my_hat.jpg',
-    content_type => 'image/jpeg', 
+    content_type => 'image/jpeg',
   );
   $object->put_filename('hat.jpg');
 

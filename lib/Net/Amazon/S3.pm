@@ -2,9 +2,7 @@ package Net::Amazon::S3;
 use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 
-=head1 NAME
-
-Net::Amazon::S3 - Use the Amazon S3 - Simple Storage Service
+# ABSTRACT: Use the Amazon S3 - Simple Storage Service
 
 =head1 SYNOPSIS
 
@@ -144,26 +142,24 @@ has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
-our $VERSION = '0.56';
-
 my $KEEP_ALIVE_CACHESIZE = 10;
 
 =head1 METHODS
 
-=head2 new 
+=head2 new
 
 Create a new S3 client object. Takes some arguments:
 
 =over
 
-=item aws_access_key_id 
+=item aws_access_key_id
 
 Use your Access Key ID as the value of the AWSAccessKeyId parameter
 in requests you send to Amazon Web Services (when required). Your
 Access Key ID identifies you as the party responsible for the
 request.
 
-=item aws_secret_access_key 
+=item aws_secret_access_key
 
 Since your Access Key ID is not encrypted in requests to AWS, it
 could be discovered and used by anyone. Services that are not free
@@ -173,7 +169,7 @@ only have come from you.
 
 DO NOT INCLUDE THIS IN SCRIPTS OR APPLICATIONS YOU DISTRIBUTE. YOU'LL BE SORRY
 
-=item secure 
+=item secure
 
 Set this to C<1> if you want to use SSL-encrypted connections when talking
 to S3. Defaults to C<0>.
@@ -186,7 +182,7 @@ to 30.
 =item retry
 
 If this library should retry upon errors. This option is recommended.
-This uses exponential backoff with retries after 1, 2, 4, 8, 16, 32 seconds, 
+This uses exponential backoff with retries after 1, 2, 4, 8, 16, 32 seconds,
 as recommended by Amazon. Defaults to off.
 
 =back
@@ -258,7 +254,7 @@ sub buckets {
     };
 }
 
-=head2 add_bucket 
+=head2 add_bucket
 
 Takes a hashref:
 
@@ -316,7 +312,7 @@ sub bucket {
 
 =head2 delete_bucket
 
-Takes either a L<Net::Amazon::S3::Bucket> object or a hashref containing 
+Takes either a L<Net::Amazon::S3::Bucket> object or a hashref containing
 
 =over
 
@@ -397,7 +393,7 @@ request, keys in the result set will not be rolled-up and neither
 the CommonPrefixes collection nor the NextMarker element will be
 present in the response.
 
-=item max-keys 
+=item max-keys
 
 This optional argument limits the number of results returned in
 response to your query. Amazon S3 will return no more than this
@@ -420,9 +416,9 @@ after the value of marker. To retrieve the next page of results,
 use the last key from the current page of results as the marker in
 your next request.
 
-See also C<next_marker>, below. 
+See also C<next_marker>, below.
 
-If C<marker> is omitted,the first page of results is returned. 
+If C<marker> is omitted,the first page of results is returned.
 
 =back
 
@@ -433,9 +429,9 @@ The hashref looks like this:
 
   {
         bucket          => $bucket_name,
-        prefix          => $bucket_prefix, 
+        prefix          => $bucket_prefix,
         common_prefixes => [$prefix1,$prefix2,...]
-        marker          => $bucket_marker, 
+        marker          => $bucket_marker,
         next_marker     => $bucket_next_available_marker,
         max_keys        => $bucket_max_keys,
         is_truncated    => $bucket_is_truncated_boolean
@@ -460,7 +456,7 @@ make a follow-up paginated request using the Marker parameter to
 retrieve the rest of the results.
 
 
-=item next_marker 
+=item next_marker
 
 A convenience element, useful when paginating with delimiters. The
 value of C<next_marker>, if present, is the largest (alphabetically)
@@ -595,7 +591,7 @@ sub _compat_bucket {
         { account => $self, bucket => delete $conf->{bucket} } );
 }
 
-=head2 add_key 
+=head2 add_key
 
 DEPRECATED. DO NOT USE
 
@@ -610,7 +606,7 @@ sub add_key {
     return $bucket->add_key( $key, $value, $conf );
 }
 
-=head2 get_key 
+=head2 get_key
 
 DEPRECATED. DO NOT USE
 
@@ -623,7 +619,7 @@ sub get_key {
     return $bucket->get_key( $conf->{key} );
 }
 
-=head2 head_key 
+=head2 head_key
 
 DEPRECATED. DO NOT USE
 
@@ -636,7 +632,7 @@ sub head_key {
     return $bucket->head_key( $conf->{key} );
 }
 
-=head2 delete_key 
+=head2 delete_key
 
 DEPRECATED. DO NOT USE
 
@@ -812,18 +808,18 @@ following notice:
 
 =head1 TESTING
 
-Testing S3 is a tricky thing. Amazon wants to charge you a bit of 
+Testing S3 is a tricky thing. Amazon wants to charge you a bit of
 money each time you use their service. And yes, testing counts as using.
-Because of this, the application's test suite skips anything approaching 
+Because of this, the application's test suite skips anything approaching
 a real test unless you set these three environment variables:
 
-=over 
+=over
 
 =item AMAZON_S3_EXPENSIVE_TESTS
 
 Doesn't matter what you set it to. Just has to be set
 
-=item AWS_ACCESS_KEY_ID 
+=item AWS_ACCESS_KEY_ID
 
 Your AWS access key
 

@@ -1,0 +1,13 @@
+severity  = 5
+only      = 1
+force     = 0
+verbose   = 4
+top       = 50
+theme     = (pbp || security) && bugs
+include   = NamingConventions ClassHierarchies
+exclude   = Variables Modules::RequirePackage RequireUseStrict RequireUseWarnings
+criticism-fatal = 1
+color     = 1
+allow-unsafe = 1
+pager     = less
+

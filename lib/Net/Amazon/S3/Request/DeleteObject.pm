@@ -3,6 +3,8 @@ use Moose 0.85;
 use Moose::Util::TypeConstraints;
 extends 'Net::Amazon::S3::Request';
 
+# ABSTRACT: An internal class to delete an object
+
 has 'bucket' => ( is => 'ro', isa => 'BucketName', required => 1 );
 has 'key'    => ( is => 'ro', isa => 'Str',        required => 1 );
 
@@ -21,10 +23,6 @@ sub http_request {
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request::DeleteObject - An internal class to delete an object
 
 =head1 SYNOPSIS
 

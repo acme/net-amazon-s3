@@ -33,6 +33,11 @@ has 'content_type' => (
     required => 0,
     default  => 'binary/octet-stream'
 );
+has 'content_disposition' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 0,
+);
 has 'content_encoding' => (
     is       => 'ro',
     isa      => 'Str',
@@ -121,6 +126,9 @@ sub put {
     }
     if ( $self->content_encoding ) {
         $conf->{'Content-Encoding'} = $self->content_encoding;
+    }
+    if ( $self->content_disposition ) { 
+        $conf->{'Content-Disposition'} = $self->content_disposition;
     }
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(

@@ -142,7 +142,8 @@ sub put {
 
     my $http_response = $self->client->_send_request($http_request);
 
-    confess 'Error uploading' if $http_response->code != 200;
+    confess 'Error uploading ' . $http_response->as_string
+        if $http_response->code != 200;
 
     my $etag = $self->_etag($http_response);
 

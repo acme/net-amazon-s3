@@ -15,6 +15,9 @@ use IO::File 1.14;
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
 
+enum 'StorageClass' =>
+    qw(standard reduced_redundancy);
+
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );
 has 'bucket' =>
@@ -42,6 +45,12 @@ has 'content_encoding' => (
     is       => 'ro',
     isa      => 'Str',
     required => 0,
+);
+has 'storage_class' => (
+    is       => 'ro',
+    isa      => 'StorageClass',
+    required => 0,
+    default  => 'standard',
 );
 
 __PACKAGE__->meta->make_immutable;
@@ -133,6 +142,9 @@ sub _put {
     }
     if ( $self->content_disposition ) { 
         $conf->{'Content-Disposition'} = $self->content_disposition;
+    }
+    if ( $self->storage_class && $self->storage_class ne 'standard' ) {
+        $conf->{'x-amz-storage-class'} = uc $self->storage_class;
     }
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
@@ -378,6 +390,9 @@ This module represents objects in buckets.
 You may also set Content-Encoding using C<content_encoding>, and
 Content-Disposition using C<content_disposition>.
 
+You may specify the S3 storage class by setting C<storage_class> to either
+C<standard> or C<reduced_redundancy>; the default is C<standard>.
+
 =head2 put_filename
 
   # upload a file
@@ -398,6 +413,9 @@ Content-Disposition using C<content_disposition>.
 
 You may also set Content-Encoding using C<content_encoding>, and
 Content-Disposition using C<content_disposition>.
+
+You may specify the S3 storage class by setting C<storage_class> to either
+C<standard> or C<reduced_redundancy>; the default is C<standard>.
 
 =head2 query_string_authentication_uri
 

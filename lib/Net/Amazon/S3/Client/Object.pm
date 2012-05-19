@@ -176,6 +176,9 @@ sub put_filename {
     if ( $self->content_encoding ) {
         $conf->{'Content-Encoding'} = $self->content_encoding;
     }
+    if ( $self->content_disposition ) {
+        $conf->{'Content-Disposition'} = $self->content_disposition;
+    }
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,

@@ -52,6 +52,12 @@ has 'storage_class' => (
     required => 0,
     default  => 'standard',
 );
+has 'user_metadata' => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    required => 0,
+    default  => sub { {} },
+);
 
 __PACKAGE__->meta->make_immutable;
 
@@ -81,6 +87,7 @@ sub get {
 
     my $http_response = $self->client->_send_request($http_request);
     my $content       = $http_response->content;
+    $self->_load_user_metadata($http_response);
 
     my $md5_hex = md5_hex($content);
 
@@ -106,6 +113,8 @@ sub get_filename {
     my $http_response
         = $self->client->_send_request( $http_request, $filename );
 
+    $self->_load_user_metadata($http_response);
+
     my $md5_hex = file_md5_hex($filename);
 
     if ( $self->etag ) {
@@ -114,6 +123,19 @@ sub get_filename {
         confess 'Corrupted download'
             if $self->_etag($http_response) ne $md5_hex;
     }
+}
+
+sub _load_user_metadata {
+    my ( $self, $http_response ) = @_;
+
+    my %user_metadata;
+    for my $header_name ($http_response->header_field_names) {
+        my ($metadata_name) = lc($header_name) =~ /\A x-amz-meta- (.*) \z/xms
+            or next;
+        $user_metadata{$metadata_name} = $http_response->header($header_name);
+    }
+
+    %{ $self->user_metadata } = %user_metadata;
 }
 
 sub put {
@@ -146,6 +168,8 @@ sub _put {
     if ( $self->storage_class && $self->storage_class ne 'standard' ) {
         $conf->{'x-amz-storage-class'} = uc $self->storage_class;
     }
+    $conf->{"x-amz-meta-\L$_"} = $self->user_metadata->{$_}
+        for keys %{ $self->user_metadata };
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,
@@ -417,6 +441,9 @@ Content-Disposition using C<content_disposition>.
 You may specify the S3 storage class by setting C<storage_class> to either
 C<standard> or C<reduced_redundancy>; the default is C<standard>.
 
+User metadata may be set by providing a non-empty hashref as
+C<user_metadata>.
+
 =head2 query_string_authentication_uri
 
   # use query string authentication
@@ -437,3 +464,15 @@ C<standard> or C<reduced_redundancy>; the default is C<standard>.
   # return the URI of a publically-accessible object
   my $uri = $object->uri;
 
+=head2 user_metadata
+
+  my $object = $bucket->object(key => $key);
+  my $content = $object->get; # or use $object->get_filename($filename)
+
+  # return the user metadata downloaded, as a hashref
+  my $user_metadata = $object->user_metadata;
+
+To upload an object with user metadata, set C<user_metadata> at construction
+time to a hashref, with no C<x-amz-meta-> prefixes on the key names.  When
+downloading an object, the C<get> and C<get_filename> methods set the
+contents of C<user_metadata> to the same format.

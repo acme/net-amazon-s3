@@ -2,7 +2,7 @@ package Net::Amazon::S3::Client::Object;
 use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 use DateTime::Format::HTTP;
-use Digest::MD5 qw(md5 md5_hex);
+use Digest::MD5 qw(md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);
 use File::stat;
 use MIME::Base64;
@@ -109,14 +109,18 @@ sub get_filename {
 
 sub put {
     my ( $self, $value ) = @_;
-    my $md5        = md5($value);
-    my $md5_hex    = unpack( 'H*', $md5 );
-    my $md5_base64 = encode_base64($md5);
+    $self->_put( $value, length $value, md5_hex($value) );
+}
+
+sub _put {
+    my ( $self, $value, $size, $md5_hex ) = @_;
+
+    my $md5_base64 = encode_base64( pack( 'H*', $md5_hex ) );
     chomp $md5_base64;
 
     my $conf = {
         'Content-MD5'    => $md5_base64,
-        'Content-Length' => length $value,
+        'Content-Length' => $size,
         'Content-Type'   => $self->content_type,
     };
 
@@ -160,42 +164,7 @@ sub put_filename {
         $size = $stat->size;
     }
 
-    my $md5 = pack( 'H*', $md5_hex );
-    my $md5_base64 = encode_base64($md5);
-    chomp $md5_base64;
-
-    my $conf = {
-        'Content-MD5'    => $md5_base64,
-        'Content-Length' => $size,
-        'Content-Type'   => $self->content_type,
-    };
-
-    if ( $self->expires ) {
-        $conf->{Expires}
-            = DateTime::Format::HTTP->format_datetime( $self->expires );
-    }
-    if ( $self->content_encoding ) {
-        $conf->{'Content-Encoding'} = $self->content_encoding;
-    }
-    if ( $self->content_disposition ) {
-        $conf->{'Content-Disposition'} = $self->content_disposition;
-    }
-
-    my $http_request = Net::Amazon::S3::Request::PutObject->new(
-        s3        => $self->client->s3,
-        bucket    => $self->bucket->name,
-        key       => $self->key,
-        value     => $self->_content_sub($filename),
-        headers   => $conf,
-        acl_short => $self->acl_short,
-    )->http_request;
-
-    my $http_response = $self->client->_send_request($http_request);
-
-    confess 'Error uploading' . $http_response->as_string
-        if $http_response->code != 200;
-
-    confess 'Corrupted upload' if $self->_etag($http_response) ne $md5_hex;
+    $self->_put( $self->_content_sub($filename), $size, $md5_hex );
 }
 
 sub delete {

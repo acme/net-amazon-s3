@@ -75,7 +75,7 @@ sub exists {
     return $http_response->code == 200 ? 1 : 0;
 }
 
-sub get {
+sub _get {
     my $self = shift;
 
     my $http_request = Net::Amazon::S3::Request::GetObject->new(
@@ -97,7 +97,17 @@ sub get {
         confess 'Corrupted download'
             if $self->_etag($http_response) ne $md5_hex;
     }
-    return $content;
+    return $http_response;
+}
+
+sub get {
+    my $self = shift;
+    return $self->_get->content;
+}
+
+sub get_decoded {
+    my $self = shift;
+    return $self->_get->decoded_content(@_);
 }
 
 sub get_filename {
@@ -385,6 +395,12 @@ This module represents objects in buckets.
   # to get the vaue of an object
   my $value = $object->get;
 
+=head2 get_decoded
+
+  # get the value of an object, and decode any Content-Encoding and/or
+  # charset; see decoded_content in HTTP::Response
+  my $value = $object->get_decoded;
+
 =head2 get_filename
 
   # download the value of the object into a file
@@ -474,5 +490,5 @@ C<user_metadata>.
 
 To upload an object with user metadata, set C<user_metadata> at construction
 time to a hashref, with no C<x-amz-meta-> prefixes on the key names.  When
-downloading an object, the C<get> and C<get_filename> methods set the
-contents of C<user_metadata> to the same format.
+downloading an object, the C<get>, C<get_decoded> and C<get_filename>
+methods set the contents of C<user_metadata> to the same format.

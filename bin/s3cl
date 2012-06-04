@@ -4,7 +4,11 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Path::Class;
+use File::Find::Rule;
+use Digest::MD5 qw(md5_hex);
 use Net::Amazon::S3;
+use MIME::Types qw(by_suffix);
+use Term::ProgressBar::Simple;
 
 # PODNAME: s3cl
 # ABSTRACT: Command line for Amazon s3 cloud storage
@@ -18,6 +22,7 @@ s3cl command [options]
   s3cl ls <bucket>:[prefix]
   s3cl cp <bucket>:<key> /path/[filename]
   s3cl sync <bucket>:[prefix] /path/
+  s3cl sync_up [--acl_short=public-read] /path/ <bucket>:[prefix]
   s3cl rm <bucket>:<key>
 
  Options:
@@ -54,6 +59,7 @@ my %commands = (
     rm       => \&rm,
     cp       => \&cp,
     sync     => \&sync,
+    sync_up  => \&sync_up,
     help     => \&helper,
 );
 
@@ -90,9 +96,9 @@ sub init_s3 {
 }
 
 sub sync {
-    my $dest = $args{dest} || '';
+    my $dest = $args{dest_or_source} || '';
     helper("No destination supplied") if $dest eq '';
-    helper("Can not write to: $args{dest}") unless -w $dest;
+    helper("Can not write to: $args{dest_or_source}") unless -w $dest;
 
     my $bucket = _get_bucket();
 
@@ -109,8 +115,88 @@ sub sync {
     }
 }
 
+sub sync_up {
+
+    my $source = $args{dest_or_source} || '';
+    my $prefix = $args{prefix_or_key}  || '';
+    my $acl_short = $args{acl_short};
+    helper("No source supplied") if $source eq '';
+    helper("Can not read directory: $args{dest_or_source}") unless -d $source;
+
+    # Work out our local files
+    my @files = File::Find::Rule->file()->in( ($source) );
+    my $progress = Term::ProgressBar::Simple->new( scalar(@files) );
+
+    my $bucket = _get_bucket();
+
+    # Get a list of all the remote files
+    my $remote_file_list = $bucket->list_all( { prefix => $prefix } )
+        or die $s3->err . ": " . $s3->errstr;
+
+    # Now hash, so we can look up a specific key to find the etag
+    my %remote_files;
+    foreach my $key_meta ( @{ $remote_file_list->{keys} } ) {
+        my $key = $key_meta->{key};
+        $remote_files{$key} = $key_meta;
+    }
+
+    my $dir        = dir($source);
+    my $dir_string = $dir->stringify;
+
+    my $mimetypes = MIME::Types->new;
+
+    foreach my $f (@files) {
+        my $file = file($f);
+        my ( $mediatype, $encoding ) = by_suffix $file->basename();
+
+        # Assume plain text unless we can work i
+        unless ($mediatype) {
+            if ( -T $file ) {
+                $mediatype = 'text/plain';
+            } else {
+                $progress++;
+                $progress->message("$f - NOT uploading");
+                warn "Not uploading: $file";
+                warn "Unknown mime type, submit patch to MIME::Types";
+                next;
+            }
+        }
+
+        my $content = $file->slurp();
+        my $md5     = md5_hex($content);
+
+        my $key = $file->stringify;
+        $key =~ s/$dir_string//;    # remove our local path for the dir
+        $key =~ s{^/}{};            # remove the trailing slash
+        $key = "$prefix$key";       # Add the prefix if there is one
+
+        if ( my $remote = $remote_files{$key} ) {
+            if ( $remote->{etag} eq $md5 ) {
+                $progress->message("$key - $mediatype - not changed");
+                next;
+            }
+        }
+
+        $bucket->add_key_filename( $key, $f, { content_type => $mediatype, },
+        ) or die $s3->err . ": " . $s3->errstr;
+
+        if ($acl_short) {
+
+            $bucket->set_acl(
+                {   key       => $key,
+                    acl_short => $acl_short,
+                }
+            ) || die $s3->err . ": " . $s3->errstr;
+        }
+        $progress->message("$key - $mediatype - uploaded");
+
+        $progress++;
+
+    }
+}
+
 sub cp {
-    my $dest = $args{dest} || '';
+    my $dest = $args{dest_or_source} || '';
     helper("No destination supplied") if $dest eq '';
 
     my $key = $args{prefix_or_key} || helper("No key supplied");
@@ -209,6 +295,7 @@ sub get_options {
     my $bucket = "";
     GetOptions(
         \%args, "bucket=s", "jurisdiction=s",
+        "acl_short=s",
         "f|force"  => \$force,
         "h|help|?" => \$help,
         "man"      => \$man,
@@ -224,8 +311,8 @@ sub get_options {
         }
     }
 
-    # For cp
-    $args{dest} = $ARGV[2] if $ARGV[2];
+    # For cp / sync etc
+    $args{dest_or_source} = $ARGV[2] if $ARGV[2];
 
     pod2usage(1) if $help || @ARGV == 0;
     pod2usage( -verbose => 2 ) if $man;
@@ -299,6 +386,26 @@ http://www.amazon.com/gp/browse.html?node=16427261
   #  Amazon S3, is free of charge (i.e., $0.00 per GB), except
   #  data transferred between Amazon EC2 and Amazon S3-Europe,
   #  which will be charged at regular rates.
+
+=item B<sync_up>
+
+s3cl sync_up [--acl_short=public-read] /path/ <bucket>:[prefix]
+
+Upload all the files below /path/ to S3, with an optional
+prefix at the start of the key name. The existing S3 files and
+meta data are fetched from S3 and the md5 (etag) is compaired to what is 
+on the local disk, files are not upload if the content has not changed.
+
+Use --acl_short to set access control, options from 
+L<Net::Amazon::S3::Bucket#set_acl> this is only applied when the 
+file is uploaded.
+
+Each files content-type is worked out using L<MIME::Types>, 
+if this does not match 'text/plain' is used for ASCII text files,
+otherwise a warning is issued and the file is NOT uploaded.
+
+Currently this does NOT remove old files from S3, and if there is
+any change to a file then the entire file will be reuploaded.
 
 =item B<rm>
 

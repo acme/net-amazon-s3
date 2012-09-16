@@ -393,14 +393,15 @@ s3cl sync_up [--acl_short=public-read] /path/ <bucket>:[prefix]
 
 Upload all the files below /path/ to S3, with an optional
 prefix at the start of the key name. The existing S3 files and
-meta data are fetched from S3 and the md5 (etag) is compaired to what is 
-on the local disk, files are not upload if the content has not changed.
+meta data are fetched from S3 and the md5 (etag) is compaired to
+what is on the local disk, files are not upload if the content has
+not changed.
 
-Use --acl_short to set access control, options from 
-L<Net::Amazon::S3::Bucket#set_acl> this is only applied when the 
+Use --acl_short to set access control, options from
+L<Net::Amazon::S3::Bucket#set_acl> this is only applied when the
 file is uploaded.
 
-Each files content-type is worked out using L<MIME::Types>, 
+Each files content-type is worked out using L<MIME::Types>,
 if this does not match 'text/plain' is used for ASCII text files,
 otherwise a warning is issued and the file is NOT uploaded.
 
@@ -436,3 +437,4 @@ following notice (which is also applicicable to this code):
 Leo Lapworth <LLAP@cuckoo.org> - Part of the HinuHinu project
 
 =cut
+

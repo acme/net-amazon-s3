@@ -127,6 +127,9 @@ sub _send_request_xpc {
 
 __END__
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   my $s3 = Net::Amazon::S3->new(

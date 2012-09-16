@@ -287,6 +287,9 @@ sub _etag {
 
 __END__
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   # show the key

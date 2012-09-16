@@ -406,7 +406,8 @@ This module represents objects in buckets.
   );
   $object->put('this is the public value');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using content_encoding, and
+Content-Disposition using content_disposition.
 
 =head2 put_filename
 
@@ -426,7 +427,8 @@ You may also set Content-Encoding using content_encoding.
   );
   $object->put_filename('hat.jpg');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using content_encoding, and
+Content-Disposition using content_disposition.
 
 =head2 query_string_authentication_uri
 

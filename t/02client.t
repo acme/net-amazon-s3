@@ -33,11 +33,11 @@ my $client = Net::Amazon::S3::Client->new( s3 => $s3 );
 my @buckets = $client->buckets;
 
 TODO: {
-    local $TODO = "These tests only work if you're leon";
+    local $TODO = "These tests only work if you're pedro";
     my $first_bucket = $buckets[0];
-    like( $first_bucket->owner_id, qr/^46a801915a1711f/, 'have owner id' );
-    is( $first_bucket->owner_display_name, '_acme_', 'have display name' );
-    is( scalar @buckets, 10, 'have a bunch of buckets' );
+    like( $first_bucket->owner_id, qr/^c7483d612ac7f0c0/, 'have owner id' );
+    is( $first_bucket->owner_display_name, 'pedro_figueiredo', 'have display name' );
+    is( scalar @buckets, 6, 'have a bunch of buckets' );
 }
 
 my $bucket_name = 'net-amazon-s3-test-' . lc $aws_access_key_id;
@@ -45,7 +45,7 @@ my $bucket_name = 'net-amazon-s3-test-' . lc $aws_access_key_id;
 my $bucket = $client->create_bucket(
     name                => $bucket_name,
     acl_short           => 'public-read',
-    location_constraint => 'US',
+    location_constraint => 'EU',
 );
 
 is( $bucket->name, $bucket_name, 'newly created bucket has correct name' );
@@ -56,7 +56,7 @@ like(
     'newly created bucket is public-readable'
 );
 
-is( $bucket->location_constraint, 'US', 'newly created bucket is in the US' );
+is( $bucket->location_constraint, 'EU', 'newly created bucket is in the EU' );
 
 my $stream = $bucket->list;
 until ( $stream->is_done ) {

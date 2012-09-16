@@ -13,6 +13,9 @@ __PACKAGE__->meta->make_immutable;
 
 # ABSTRACT: convenience object for working with Amazon S3 buckets
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   use Net::Amazon::S3;
@@ -23,7 +26,7 @@ __PACKAGE__->meta->make_immutable;
   ok($bucket->add_key("key", "data", {
      content_type => "text/html",
     'x-amz-meta-colour' => 'orange',
-  });
+  }));
 
   # the err and errstr methods just proxy up to the Net::Amazon::S3's
   # objects err/errstr methods.

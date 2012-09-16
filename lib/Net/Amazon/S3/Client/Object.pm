@@ -127,7 +127,7 @@ sub put {
     if ( $self->content_encoding ) {
         $conf->{'Content-Encoding'} = $self->content_encoding;
     }
-    if ( $self->content_disposition ) { 
+    if ( $self->content_disposition ) {
         $conf->{'Content-Disposition'} = $self->content_disposition;
     }
 
@@ -176,6 +176,10 @@ sub put_filename {
     if ( $self->content_encoding ) {
         $conf->{'Content-Encoding'} = $self->content_encoding;
     }
+    if ( $self->content_disposition ) {
+        $conf->{'Content-Disposition'} = $self->content_disposition;
+    }
+
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,
@@ -282,6 +286,9 @@ sub _etag {
 1;
 
 __END__
+
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 
@@ -402,7 +409,8 @@ This module represents objects in buckets.
   );
   $object->put('this is the public value');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using content_encoding, and
+Content-Disposition using content_disposition.
 
 =head2 put_filename
 
@@ -422,7 +430,8 @@ You may also set Content-Encoding using content_encoding.
   );
   $object->put_filename('hat.jpg');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using content_encoding, and
+Content-Disposition using content_disposition.
 
 =head2 query_string_authentication_uri
 

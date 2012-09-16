@@ -689,7 +689,6 @@ sub _send_request_expect_nothing {
     # warn $http_request->as_string;
 
     my $response = $self->_do_http($http_request);
-    my $content  = $response->content;
 
     return 1 if $response->code =~ /^2\d\d$/;
 
@@ -730,8 +729,6 @@ sub _send_request_expect_nothing_probed {
 
     $response = $self->_do_http($http_request);
     $self->ua->requests_redirectable($old_redirectable);
-
-    my $content = $response->content;
 
     return 1 if $response->code =~ /^2\d\d$/;
 

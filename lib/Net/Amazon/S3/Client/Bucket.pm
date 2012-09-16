@@ -145,6 +145,9 @@ sub object {
 
 __END__
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   # return the bucket name

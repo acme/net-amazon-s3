@@ -20,6 +20,9 @@ sub http_request {
 
 __END__
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   my $http_request

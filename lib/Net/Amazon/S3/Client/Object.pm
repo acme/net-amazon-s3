@@ -74,13 +74,9 @@ sub get {
     my $content       = $http_response->content;
 
     my $md5_hex = md5_hex($content);
+    my $etag = $self->etag || $self->_etag($http_response);
+    confess 'Corrupted download' if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
 
-    if ( $self->etag ) {
-        confess 'Corrupted download' if $self->etag ne $md5_hex;
-    } else {
-        confess 'Corrupted download'
-            if $self->_etag($http_response) ne $md5_hex;
-    }
     return $content;
 }
 
@@ -99,12 +95,8 @@ sub get_filename {
 
     my $md5_hex = file_md5_hex($filename);
 
-    if ( $self->etag ) {
-        confess 'Corrupted download' if $self->etag ne $md5_hex;
-    } else {
-        confess 'Corrupted download'
-            if $self->_etag($http_response) ne $md5_hex;
-    }
+    my $etag = $self->etag || $self->_etag($http_response);
+    confess 'Corrupted download' if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
 }
 
 sub put {
@@ -210,6 +202,57 @@ sub delete {
     $self->client->_send_request($http_request);
 }
 
+sub initiate_multipart_upload {
+    my $self = shift;
+    my $http_request = Net::Amazon::S3::Request::InitiateMultipartUpload->new(
+        s3     => $self->client->s3,
+        bucket => $self->bucket->name,
+        key    => $self->key,
+    )->http_request;
+    my $res = $self->client->_send_request($http_request);
+    return unless $res->is_success;
+    
+    my $doc = $self->client->s3->libxml->parse_string($res->content);
+    my $xpc = XML::LibXML::XPathContext->new($doc);
+    $xpc->registerNs( 's3',
+        'http://s3.amazonaws.com/doc/2006-03-01/' );
+    my $upload_id = $xpc->findvalue('//s3:UploadId');
+    return $upload_id;
+}
+
+sub complete_multipart_upload {
+    my $self = shift;
+
+    my %args = ref($_[0]) ? {$_[0]} : @_; 
+    
+    #set default args
+    $args{s3}       = $self->client->s3;
+    $args{key}      = $self->key;
+    $args{bucket}   = $self->bucket->name;
+    
+    my $http_request = Net::Amazon::S3::Request::CompleteMultipartUpload->new(%args)->http_request;
+    return $self->client->_send_request($http_request);
+}
+
+sub put_part {
+    my $self = shift;
+    
+    my %args = ref($_[0]) ? {$_[0]} : @_;
+    
+    #set default args
+    $args{s3}       = $self->client->s3;
+    $args{key}      = $self->key;
+    $args{bucket}   = $self->bucket->name;
+    
+    my $http_request = Net::Amazon::S3::Request::PutPart->new(%args)->http_request;
+    return $self->client->_send_request($http_request);
+}
+
+sub list_parts {
+    confess "Not implemented";
+    #TODO - Net::Amazon::S3::Request:ListParts is implemented, but need to define best interface at this level. Currently returns raw XML
+}
+
 sub uri {
     my $self = shift;
     return Net::Amazon::S3::Request::GetObject->new(
@@ -281,6 +324,11 @@ sub _etag {
         $etag =~ s/"$//;
     }
     return $etag;
+}
+
+sub _is_multipart_etag {
+    my ( $self, $etag ) = @_;
+    return 1 if($etag =~ /\-\d+$/);
 }
 
 1;
@@ -453,3 +501,34 @@ Content-Disposition using content_disposition.
   # return the URI of a publically-accessible object
   my $uri = $object->uri;
 
+=head2 initiate_multipart_upload
+
+  #initiate a new multipart upload for this object
+  my $object = $bucket->object(
+    key         => 'massive_video.avi'
+  );
+  my $upload_id = $object->initiate_multipart_upload;
+
+=head2 put_part
+
+  #add a part to a multipart upload
+  my $put_part_response = $object->put_part(
+     upload_id      => $upload_id,
+     part_number    => 1,
+     value          => $chunk_content,
+  );
+  my $part_etag = $put_part_response->header('ETag')
+  
+  Returns an L<HTTP::Response> object. It is necessary to keep the ETags for each part, as these are required to complete the upload.
+
+=head2 complete_multipart_upload
+
+  #complete a multipart upload
+  $object->complete_multipart_upload(
+    upload_id       => $upload_id,
+    etags           => [$etag_1, $etag_2],
+    part_numbers    => [$part_number_1, $part_number2],
+  );
+  
+  The etag and part_numbers parameters are ordered lists specifying the part numbers and ETags for each individual part of the multipart upload.
+  

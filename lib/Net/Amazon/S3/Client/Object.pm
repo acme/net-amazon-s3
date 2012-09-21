@@ -209,21 +209,17 @@ sub initiate_multipart_upload {
         bucket => $self->bucket->name,
         key    => $self->key,
     )->http_request;
-    my $res = $self->client->_send_request($http_request);
-    return unless $res->is_success;
-    
-    my $doc = $self->client->s3->libxml->parse_string($res->content);
-    my $xpc = XML::LibXML::XPathContext->new($doc);
-    $xpc->registerNs( 's3',
-        'http://s3.amazonaws.com/doc/2006-03-01/' );
+    my $xpc = $self->client->_send_request_xpc($http_request);
     my $upload_id = $xpc->findvalue('//s3:UploadId');
+    confess "Couldn't get upload id from initiate_multipart_upload response XML" unless $upload_id;
+    
     return $upload_id;
 }
 
 sub complete_multipart_upload {
     my $self = shift;
 
-    my %args = ref($_[0]) ? {$_[0]} : @_; 
+    my %args = ref($_[0]) ? %{$_[0]} : @_; 
     
     #set default args
     $args{s3}       = $self->client->s3;
@@ -237,12 +233,14 @@ sub complete_multipart_upload {
 sub put_part {
     my $self = shift;
     
-    my %args = ref($_[0]) ? {$_[0]} : @_;
+    my %args = ref($_[0]) ? %{$_[0]} : @_;
     
     #set default args
     $args{s3}       = $self->client->s3;
     $args{key}      = $self->key;
     $args{bucket}   = $self->bucket->name;
+    #work out content length header
+    $args{headers}->{'Content-Length'} = length $args{value} if(defined $args{value});
     
     my $http_request = Net::Amazon::S3::Request::PutPart->new(%args)->http_request;
     return $self->client->_send_request($http_request);

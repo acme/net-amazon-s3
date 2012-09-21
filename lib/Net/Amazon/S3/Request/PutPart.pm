@@ -24,8 +24,7 @@ sub http_request {
         $headers->{'x-amz-acl'} = $self->acl_short;
     }
     
-    $headers->{'Content-Length'} = length $self->value if(defined $self->value);
-    if($self->copy_source_bucket && $self->copy_source_key){
+    if(defined $self->copy_source_bucket && defined $self->copy_source_key){
         $headers->{'x-amz-copy-source'} = $self->copy_source_bucket.'/'.$self->copy_source_key;
     }
 

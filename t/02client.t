@@ -7,7 +7,7 @@ use LWP::Simple;
 use File::stat;
 use Test::More;
 use Test::Exception;
-use Fcntl qw(:seek);
+use File::Temp qw/ :seekable /;
 
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
@@ -236,14 +236,10 @@ is( $objects[0]->size, $readme_size,
 ok( $objects[0]->last_modified, 'newly created object has a last modified' );
 
 # download an object with get_filename
-
-if ( -f 't/README' ) {
-    unlink('t/README') || die $!;
-}
-
-$object->get_filename('t/README');
-is( stat('t/README')->size,   $readme_size,   'download has right size' );
-is( file_md5_hex('t/README'), $readme_md5hex, 'download has right etag' );
+my $tmp_fh = File::Temp->new();
+$object->get_filename($tmp_fh->filename);
+is( stat($tmp_fh->filename)->size,   $readme_size,   'download has right size' );
+is( file_md5_hex($tmp_fh->filename), $readme_md5hex, 'download has right etag' );
 
 $object->delete;
 
@@ -289,25 +285,20 @@ ok(
 #get the file and check that it looks like we expect
 ok($object->exists, "object has now been created");
 
-if ( -f 't/multipart-test' ) {
-    unlink('t/multipart-test') || die $!;
-}
-$object->get_filename('t/multipart-test');
-is( stat('t/multipart-test')->size, 6 * 1024 * 1024, "downloaded file has a size equivalent to the sum of it's parts");
+$tmp_fh = File::Temp->new();
+$object->get_filename($tmp_fh->filename);
+is( stat($tmp_fh->filename)->size, 6 * 1024 * 1024, "downloaded file has a size equivalent to the sum of it's parts");
 
-open(my $test_fh, '<', 't/multipart-test');
-seek($test_fh, (5 * 1024 * 1024) - 1, SEEK_SET); #jump to 5MB position
+$tmp_fh->seek((5 * 1024 * 1024) - 1, SEEK_SET);#jump to 5MB position
 my $test_bytes;
-read($test_fh, $test_bytes, 2);
+read($tmp_fh, $test_bytes, 2);
 is($test_bytes, "xz", "The second chunk of the file begins in the correct place");
-close $test_fh;
 
-unlink('t/multipart-test') || die $!;
 $object->delete;
 
 #test multi-object delete
 #make 3 identical objects
-my @objects;
+@objects =();
 for my $i(1..3){
     my $bulk_object = $bucket->object(
         key  => "bulk-readme-$i",

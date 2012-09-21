@@ -19,7 +19,7 @@ __PACKAGE__->meta->make_immutable;
 sub http_request {
     my $self = shift;
 
-    croak "must have an equally sized list of etags and part numbers" unless scalar(@{$self->part_numbers}) eq scalar(@{$self->etags});
+    croak "must have an equally sized list of etags and part numbers" unless scalar(@{$self->part_numbers}) == scalar(@{$self->etags});
     #build XML doc
     my $xml_doc = XML::LibXML::Document->new('1.0','UTF-8');
     my $root_element = $xml_doc->createElement('CompleteMultipartUpload');
@@ -75,7 +75,7 @@ Net::Amazon::S3::Request::CompleteMultipartUpload - An internal class to complet
 
 =head1 DESCRIPTION
 
-This module deletes multiple objects from a bucket.
+This module completes a multipart upload.
 
 =head1 METHODS
 

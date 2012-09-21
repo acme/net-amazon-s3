@@ -145,7 +145,7 @@ sub _canonical_string {
     if ( $path =~ /[&?](acl|torrent|location|uploads|delete)($|=|&)/ ) {
         $buf .= "?$1";
     } elsif ( my %query_params = URI->new($path)->query_form ){
-        #see if the remaining parsed query string provides us with any
+        #see if the remaining parsed query string provides us with any query string or upload id
         if($query_params{partNumber} && $query_params{uploadId}){
             #re-evaluate query string, the order of the params is important for request signing, so we can't depend on URI to do the right thing
             $buf .= sprintf("?partNumber=%s&uploadId=%s", $query_params{partNumber}, $query_params{uploadId});
@@ -154,29 +154,6 @@ sub _canonical_string {
             $buf .= sprintf("?uploadId=%s",$query_params{uploadId});
         }
     }
-
-    # action parameters
-    #check for allowed CGI params
-#    my $uri = URI->new($path);
-#    if(my $qs = $uri->query){
-#        #sometimes the query string might composed only of a single key, which URI won't parse properl
-#        #if that's the case check that it's a valid one, and just bolt it on the end
-#        if($qs ~~ [qw/delete torrent uploads location/]){
-#            $buf .= "?$qs";
-#        }
-#        else {
-#            my %query_params = $uri->query_form;
-#            #strip out disallowed query params
-#            if($query_params{partNumber} && $query_params{uploadId}){
-#                #re-evaluate query string, the order of the params is important, so we can't depend on URI
-#                $qs = sprintf("partNumber=%s&uploadId=%s", $query_params{partNumber}, $query_params{uploadId});
-#            }
-#            elsif($query_params{uploadId}){
-#                $qs = sprintf("uploadId=%s",$query_params{uploadId});
-#            }
-#            $buf .= "?$qs" if($qs);
-#        }
-#    }
 
     return $buf;
 }

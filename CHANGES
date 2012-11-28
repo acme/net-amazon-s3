@@ -2,6 +2,11 @@ Revision history for Perl module Net::Amazon::S3:
 
 {{$NEXT}}
 
+0.57 Sun Sep 16 22:38:38 BST 2012
+    - Added support for Content-disposition (initial patch by Michele Beltrame)
+    - Added sync_up option to s3cl (patch by Leo Lapworth)
+    - Dist::Zilla tidying
+
 0.56 Sun Dec 18 22:22:32 GMT 2011
     - Spelling error (RT #69817, patch from Fabrizio Regalli)
     - Added use_ok tests (RT #72856, suggested by Gregor Herrmann)
@@ -74,7 +79,7 @@ Revision history for Perl module Net::Amazon::S3:
     - remove DateTime::Format::Strptime prerequisite as it was not
       being used (noticed by Yen-Ming Lee)
     - do not try and parse non-XML errors (patch by lostlogic)
-    - make it possible to store and delete the key "0" 
+    - make it possible to store and delete the key "0"
       (patch by Joey Hess)
     - make it possible to store empty files (patch by BDOLAN)
     - add Copy support (patch by BDOLAN)

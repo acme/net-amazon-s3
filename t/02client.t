@@ -7,11 +7,12 @@ use LWP::Simple;
 use File::stat;
 use Test::More;
 use Test::Exception;
+use File::Temp qw/ :seekable /;
 
 unless ( $ENV{'AMAZON_S3_EXPENSIVE_TESTS'} ) {
     plan skip_all => 'Testing this module for real costs money.';
 } else {
-    plan tests => 38;
+    plan tests => 48;
 }
 
 use_ok('Net::Amazon::S3');
@@ -235,14 +236,10 @@ is( $objects[0]->size, $readme_size,
 ok( $objects[0]->last_modified, 'newly created object has a last modified' );
 
 # download an object with get_filename
-
-if ( -f 't/README' ) {
-    unlink('t/README') || die $!;
-}
-
-$object->get_filename('t/README');
-is( stat('t/README')->size,   $readme_size,   'download has right size' );
-is( file_md5_hex('t/README'), $readme_md5hex, 'download has right etag' );
+my $tmp_fh = File::Temp->new();
+$object->get_filename($tmp_fh->filename);
+is( stat($tmp_fh->filename)->size,   $readme_size,   'download has right size' );
+is( file_md5_hex($tmp_fh->filename), $readme_md5hex, 'download has right etag' );
 
 $object->delete;
 
@@ -258,5 +255,63 @@ is( length( get( $object->uri ) ),
     $readme_size, 'newly uploaded public object has the right size' );
 $object->delete;
 
-$bucket->delete;
 
+# upload an object using multipart upload
+$object = $bucket->object(
+    key       => 'new multipart file',
+    acl_short => 'public-read'
+);
+
+my $upload_id;
+ok($upload_id = $object->initiate_multipart_upload, "can initiate a new multipart upload");
+
+#put part
+
+my $put_part_response;
+ok( $put_part_response = $object->put_part(part_number => 1, upload_id => $upload_id, value => 'x' x (5 * 1024 * 1024)), 'Got a successful response for PUT part' );
+my @etags;
+push @etags, $put_part_response->header('ETag');
+ok( $put_part_response = $object->put_part(part_number => 2, upload_id => $upload_id, value => 'z' x (1024 * 1024)), 'Got a successful response for 2nd PUT part' );
+push @etags, $put_part_response->header('ETag');
+
+# TODO list part? - We've got this, but how to expose it nicely?
+
+#complete multipart upload
+my $complete_upload_response;
+ok(
+    $complete_upload_response = $object->complete_multipart_upload( upload_id => $upload_id, part_numbers => [1,2], etags => \@etags),
+    "successful response for complete multipart upload"
+);
+#get the file and check that it looks like we expect
+ok($object->exists, "object has now been created");
+
+$tmp_fh = File::Temp->new();
+$object->get_filename($tmp_fh->filename);
+is( stat($tmp_fh->filename)->size, 6 * 1024 * 1024, "downloaded file has a size equivalent to the sum of it's parts");
+
+$tmp_fh->seek((5 * 1024 * 1024) - 1, SEEK_SET);#jump to 5MB position
+my $test_bytes;
+read($tmp_fh, $test_bytes, 2);
+is($test_bytes, "xz", "The second chunk of the file begins in the correct place");
+
+$object->delete;
+
+#test multi-object delete
+#make 3 identical objects
+@objects =();
+for my $i(1..3){
+    my $bulk_object = $bucket->object(
+        key  => "bulk-readme-$i",
+        etag => $readme_md5hex,
+        size => $readme_size
+    );
+    $bulk_object->put_filename('README');
+    push @objects, $bulk_object;
+}
+#now delete 2 of those objects
+ok($bucket->delete_multi_object(@objects[0..1]), "executed multi delete operation");
+ok( !grep($_->exists, @objects[0..1]), "target objects no longer exist");
+ok( $objects[2]->exists, "object not included in multi-object delete still exists" );
+$objects[2]->delete;
+
+$bucket->delete;

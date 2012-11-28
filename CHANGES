@@ -2,6 +2,10 @@ Revision history for Perl module Net::Amazon::S3:
 
 {{$NEXT}}
 
+0.58 Wed Nov 28 16:22:42 GMT 2012
+    - Added support for multi-part upload and multiple objects deletion (patch
+      by Robert B. Clarke)
+
 0.57 Sun Sep 16 22:38:38 BST 2012
     - Added support for Content-disposition (initial patch by Michele Beltrame)
     - Added sync_up option to s3cl (patch by Leo Lapworth)

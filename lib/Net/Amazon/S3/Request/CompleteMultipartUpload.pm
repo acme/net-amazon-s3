@@ -19,27 +19,29 @@ __PACKAGE__->meta->make_immutable;
 sub http_request {
     my $self = shift;
 
-    croak "must have an equally sized list of etags and part numbers" unless scalar(@{$self->part_numbers}) == scalar(@{$self->etags});
+    croak "must have an equally sized list of etags and part numbers"
+        unless scalar(@{$self->part_numbers}) == scalar(@{$self->etags});
+
     #build XML doc
     my $xml_doc = XML::LibXML::Document->new('1.0','UTF-8');
     my $root_element = $xml_doc->createElement('CompleteMultipartUpload');
     $xml_doc->addChild($root_element);
-    
-    #add content 
+
+    #add content
     for(my $i = 0; $i < scalar(@{$self->part_numbers}); $i++ ){
         my $part = $xml_doc->createElement('Part');
         $part->appendTextChild('PartNumber' => $self->part_numbers->[$i]);
         $part->appendTextChild('ETag' => $self->etags->[$i]);
         $root_element->addChild($part);
     }
-    
+
     my $content = $xml_doc->toString;
-    
+
     my $md5        = md5($content);
-    
+
     my $md5_base64 = encode_base64($md5);
     chomp $md5_base64;
-    
+
     my $header_spec = {
         'Content-MD5'    => $md5_base64,
         'Content-Length' => length $content,
@@ -60,9 +62,7 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::CompleteMultipartUpload - An internal class to complete a multipart upload
+# ABSTRACT: An internal class to complete a multipart upload
 
 =head1 SYNOPSIS
 

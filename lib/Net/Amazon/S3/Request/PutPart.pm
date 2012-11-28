@@ -11,7 +11,7 @@ has 'part_number'   => ( is => 'ro', isa => 'Int',             required => 1 );
 has 'copy_source_bucket'    => ( is => 'ro', isa => 'Str',     required => 0 );
 has 'copy_source_key'       => ( is => 'ro', isa => 'Str',     required => 0 );
 has 'acl_short'     => ( is => 'ro', isa => 'Maybe[AclShort]', required => 0 );
-has 'headers' => 
+has 'headers' =>
     ( is => 'ro', isa => 'HashRef', required => 0, default => sub { {} } );
 
 __PACKAGE__->meta->make_immutable;
@@ -23,15 +23,20 @@ sub http_request {
     if ( $self->acl_short ) {
         $headers->{'x-amz-acl'} = $self->acl_short;
     }
-    
+
     if(defined $self->copy_source_bucket && defined $self->copy_source_key){
-        $headers->{'x-amz-copy-source'} = $self->copy_source_bucket.'/'.$self->copy_source_key;
+        $headers->{'x-amz-copy-source'} =
+            $self->copy_source_bucket.'/'.$self->copy_source_key;
     }
 
     return Net::Amazon::S3::HTTPRequest->new(
         s3      => $self->s3,
         method  => 'PUT',
-        path    => $self->_uri( $self->key ).'?partNumber='.$self->part_number.'&uploadId='.$self->upload_id,
+        path    => $self->_uri($self->key) .
+                   '?partNumber=' .
+                   $self->part_number .
+                   '&uploadId=' .
+                   $self->upload_id,
         headers => $headers,
         content => $self->value // '',
     )->http_request;
@@ -41,9 +46,7 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::PutPart - An internal class to put part of a multipart upload
+# ABSTRACT: An internal class to put part of a multipart upload
 
 =head1 SYNOPSIS
 

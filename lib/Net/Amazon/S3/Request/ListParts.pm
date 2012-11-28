@@ -1,5 +1,7 @@
 package Net::Amazon::S3::Request::ListParts;
 
+# ABSTRACT: List the parts in a multipart upload.
+
 use Moose 0.85;
 use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';

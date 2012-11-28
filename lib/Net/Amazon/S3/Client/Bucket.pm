@@ -244,7 +244,6 @@ This module represents buckets.
 =head2 delete_multi_object
 
   # delete multiple objects using a multi object delete operation
-  # Accepts a list of L<Net::Amazon::S3::Client::Object> objects. 
+  # Accepts a list of L<Net::Amazon::S3::Client::Object> objects.
   # Limited to a maximum of 1000 objects in one operation
   $bucket->delete_multi_object($object1, $object2)
-

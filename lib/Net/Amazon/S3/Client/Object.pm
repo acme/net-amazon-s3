@@ -75,13 +75,14 @@ sub get {
 
     my $md5_hex = md5_hex($content);
     my $etag = $self->etag || $self->_etag($http_response);
-    confess 'Corrupted download' if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
+    confess 'Corrupted download'
+      if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
 
     return $content;
 }
 
 sub get_filename {
-    my ( $self, $filename ) = @_;
+    my ($self, $filename) = @_;
 
     my $http_request = Net::Amazon::S3::Request::GetObject->new(
         s3     => $self->client->s3,
@@ -91,12 +92,13 @@ sub get_filename {
     )->http_request;
 
     my $http_response
-        = $self->client->_send_request( $http_request, $filename );
+        = $self->client->_send_request($http_request, $filename);
 
     my $md5_hex = file_md5_hex($filename);
 
     my $etag = $self->etag || $self->_etag($http_response);
-    confess 'Corrupted download' if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
+    confess
+      'Corrupted download' if(!$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
 }
 
 sub put {
@@ -211,44 +213,49 @@ sub initiate_multipart_upload {
     )->http_request;
     my $xpc = $self->client->_send_request_xpc($http_request);
     my $upload_id = $xpc->findvalue('//s3:UploadId');
-    confess "Couldn't get upload id from initiate_multipart_upload response XML" unless $upload_id;
-    
+    confess "Couldn't get upload id from initiate_multipart_upload response XML"
+      unless $upload_id;
+
     return $upload_id;
 }
 
 sub complete_multipart_upload {
     my $self = shift;
 
-    my %args = ref($_[0]) ? %{$_[0]} : @_; 
-    
+    my %args = ref($_[0]) ? %{$_[0]} : @_;
+
     #set default args
     $args{s3}       = $self->client->s3;
     $args{key}      = $self->key;
     $args{bucket}   = $self->bucket->name;
-    
-    my $http_request = Net::Amazon::S3::Request::CompleteMultipartUpload->new(%args)->http_request;
+
+    my $http_request =
+      Net::Amazon::S3::Request::CompleteMultipartUpload->new(%args)->http_request;
     return $self->client->_send_request($http_request);
 }
 
 sub put_part {
     my $self = shift;
-    
+
     my %args = ref($_[0]) ? %{$_[0]} : @_;
-    
+
     #set default args
     $args{s3}       = $self->client->s3;
     $args{key}      = $self->key;
     $args{bucket}   = $self->bucket->name;
     #work out content length header
-    $args{headers}->{'Content-Length'} = length $args{value} if(defined $args{value});
-    
-    my $http_request = Net::Amazon::S3::Request::PutPart->new(%args)->http_request;
+    $args{headers}->{'Content-Length'} = length $args{value}
+      if(defined $args{value});
+
+    my $http_request =
+      Net::Amazon::S3::Request::PutPart->new(%args)->http_request;
     return $self->client->_send_request($http_request);
 }
 
 sub list_parts {
     confess "Not implemented";
-    #TODO - Net::Amazon::S3::Request:ListParts is implemented, but need to define best interface at this level. Currently returns raw XML
+    # TODO - Net::Amazon::S3::Request:ListParts is implemented, but need to
+    # define better interface at this level. Currently returns raw XML.
 }
 
 sub uri {
@@ -516,8 +523,9 @@ Content-Disposition using content_disposition.
      value          => $chunk_content,
   );
   my $part_etag = $put_part_response->header('ETag')
-  
-  Returns an L<HTTP::Response> object. It is necessary to keep the ETags for each part, as these are required to complete the upload.
+
+  Returns an L<HTTP::Response> object. It is necessary to keep the ETags for
+  each part, as these are required to complete the upload.
 
 =head2 complete_multipart_upload
 
@@ -527,6 +535,6 @@ Content-Disposition using content_disposition.
     etags           => [$etag_1, $etag_2],
     part_numbers    => [$part_number_1, $part_number2],
   );
-  
-  The etag and part_numbers parameters are ordered lists specifying the part numbers and ETags for each individual part of the multipart upload.
-  
+
+  The etag and part_numbers parameters are ordered lists specifying the part
+  numbers and ETags for each individual part of the multipart upload.

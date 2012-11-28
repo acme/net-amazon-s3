@@ -16,26 +16,27 @@ sub http_request {
     my $self = shift;
 
     #croak if we get a request for over 1000 objects
-    croak "The maximum number of keys is 1000" if(scalar(@{ $self->keys }) > 1000);
+    croak "The maximum number of keys is 1000"
+    if (scalar(@{$self->keys}) > 1000);
 
     #build XML doc
     my $xml_doc = XML::LibXML::Document->new('1.0','UTF-8');
     my $root_element = $xml_doc->createElement('Delete');
     $xml_doc->addChild($root_element);
     $root_element->appendTextChild('Quiet'=>'true');
-    #add content 
+    #add content
     foreach my $key (@{$self->keys}){
         my $obj_element = $xml_doc->createElement('Object');
         $obj_element->appendTextChild('Key' => $key);
         $root_element->addChild($obj_element);
     }
-    
+
     my $content = $xml_doc->toString;
 
     my $md5        = md5($content);
     my $md5_base64 = encode_base64($md5);
     chomp $md5_base64;
-    
+
     my $header_spec = {
         'Content-MD5'    => $md5_base64,
         'Content-Length' => length $content,
@@ -56,9 +57,7 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::DeleteMultiObject - An internal class to delete multiple objects from a bucket
+# ABSTRACT: An internal class to delete multiple objects from a bucket
 
 =head1 SYNOPSIS
 

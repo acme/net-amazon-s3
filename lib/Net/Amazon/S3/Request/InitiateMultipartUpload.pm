@@ -32,9 +32,7 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::InitiateMultipartUpload - An internal class to begin a multipart upload
+#ABSTRACT: An internal class to begin a multipart upload
 
 =head1 SYNOPSIS
 

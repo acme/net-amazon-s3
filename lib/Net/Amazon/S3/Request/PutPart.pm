@@ -48,17 +48,20 @@ __END__
 
 # ABSTRACT: An internal class to put part of a multipart upload
 
+=for test_synopsis
+no strict 'vars'
+
 =head1 SYNOPSIS
 
   my $http_request = Net::Amazon::S3::Request::PutPart->new(
-    s3        => $s3,
-    bucket    => $bucket,
-    key       => $key,
-    value     => $value,
-    acl_short => $acl_short,
-    headers   => $conf,
-    part_number => $part_number
-    upload_id => $upload_id
+    s3          => $s3,
+    bucket      => $bucket,
+    key         => $key,
+    value       => $value,
+    acl_short   => $acl_short,
+    headers     => $conf,
+    part_number => $part_number,
+    upload_id   => $upload_id
   )->http_request;
 
 =head1 DESCRIPTION

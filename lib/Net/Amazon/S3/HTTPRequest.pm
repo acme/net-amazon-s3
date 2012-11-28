@@ -6,13 +6,14 @@ use MIME::Base64 qw( encode_base64 );
 use Moose::Util::TypeConstraints;
 use URI::Escape qw( uri_escape_utf8 );
 use URI::QueryParam;
+use URI;
 
 # ABSTRACT: Create a signed HTTP::Request
 
 my $METADATA_PREFIX      = 'x-amz-meta-';
 my $AMAZON_HEADER_PREFIX = 'x-amz-';
 
-enum 'HTTPMethod' => qw(DELETE GET HEAD PUT);
+enum 'HTTPMethod' => qw(DELETE GET HEAD PUT POST);
 
 has 's3'     => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 has 'method' => ( is => 'ro', isa => 'HTTPMethod',      required => 1 );
@@ -140,13 +141,18 @@ sub _canonical_string {
     $path =~ /^([^?]*)/;
     $buf .= "/$1";
 
-    # ...unless there is an acl or torrent parameter
-    if ( $path =~ /[&?]acl($|=|&)/ ) {
-        $buf .= '?acl';
-    } elsif ( $path =~ /[&?]torrent($|=|&)/ ) {
-        $buf .= '?torrent';
-    } elsif ( $path =~ /[&?]location($|=|&)/ ) {
-        $buf .= '?location';
+    # ...unless there any parameters we're interested in...
+    if ( $path =~ /[&?](acl|torrent|location|uploads|delete)($|=|&)/ ) {
+        $buf .= "?$1";
+    } elsif ( my %query_params = URI->new($path)->query_form ){
+        #see if the remaining parsed query string provides us with any query string or upload id
+        if($query_params{partNumber} && $query_params{uploadId}){
+            #re-evaluate query string, the order of the params is important for request signing, so we can't depend on URI to do the right thing
+            $buf .= sprintf("?partNumber=%s&uploadId=%s", $query_params{partNumber}, $query_params{uploadId});
+        }
+        elsif($query_params{uploadId}){
+            $buf .= sprintf("?uploadId=%s",$query_params{uploadId});
+        }
     }
 
     return $buf;

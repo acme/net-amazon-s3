@@ -17,7 +17,7 @@ sub http_request {
 
     #croak if we get a request for over 1000 objects
     croak "The maximum number of keys is 1000"
-    if (scalar(@{$self->keys}) > 1000);
+        if (scalar(@{$self->keys}) > 1000);
 
     #build XML doc
     my $xml_doc = XML::LibXML::Document->new('1.0','UTF-8');

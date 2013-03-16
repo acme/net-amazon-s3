@@ -177,9 +177,9 @@ DO NOT INCLUDE THIS IN SCRIPTS OR APPLICATIONS YOU DISTRIBUTE. YOU'LL BE SORRY
 
 =item aws_session_token
 
-If you are using temporary credentials provided by AWS Security Token Service,
-set here the provided token, which will be placed in the request in order
-to authenticate it.
+If you are using temporary credentials provided by the AWS Security Token
+Service, set the token here, and it will be added to the request in order to
+authenticate it.
 
 =item secure
 

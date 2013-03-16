@@ -94,9 +94,8 @@ sub _add_auth_header {
         $headers->header( Date => time2str(time) );
     }
 
-    if (    not $headers->header('x-amz-security-token')
-        and defined $aws_session_token )
-    {
+    if ( not $headers->header('x-amz-security-token') and
+         defined $aws_session_token ) {
         $headers->header( 'x-amz-security-token' => $aws_session_token );
     }
 

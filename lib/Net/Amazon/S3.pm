@@ -144,6 +144,7 @@ has 'libxml' => ( is => 'rw', isa => 'XML::LibXML',    required => 0 );
 has 'ua'     => ( is => 'rw', isa => 'LWP::UserAgent', required => 0 );
 has 'err'    => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
+has 'aws_session_token' => ( is => 'ro', isa => 'Str', required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
@@ -173,6 +174,12 @@ to verify that a request containing your unique Access Key ID could
 only have come from you.
 
 DO NOT INCLUDE THIS IN SCRIPTS OR APPLICATIONS YOU DISTRIBUTE. YOU'LL BE SORRY
+
+=item aws_session_token
+
+If you are using temporary credentials provided by the AWS Security Token
+Service, set the token here, and it will be added to the request in order to
+authenticate it.
 
 =item secure
 

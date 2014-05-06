@@ -22,7 +22,7 @@ s3cl command [options]
   s3cl ls <bucket>:[prefix]
   s3cl cp <bucket>:<key> /path/[filename]
   s3cl sync <bucket>:[prefix] /path/
-  s3cl sync_up [--acl_short=public-read] /path/ <bucket>:[prefix]
+  s3cl sync_up [--acl_short=public-read] <bucket>:[prefix] /path/
   s3cl rm <bucket>:<key>
 
  Options:
@@ -389,7 +389,7 @@ http://www.amazon.com/gp/browse.html?node=16427261
 
 =item B<sync_up>
 
-s3cl sync_up [--acl_short=public-read] /path/ <bucket>:[prefix]
+s3cl sync_up [--acl_short=public-read] <bucket>:[prefix] /path/
 
 Upload all the files below /path/ to S3, with an optional
 prefix at the start of the key name. The existing S3 files and

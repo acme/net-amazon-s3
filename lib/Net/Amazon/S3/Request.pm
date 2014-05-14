@@ -45,7 +45,7 @@ __PACKAGE__->meta->make_immutable;
 sub _uri {
     my ( $self, $key ) = @_;
     return ($key)
-        ? $self->bucket . "/" . $self->s3->_urlencode($key)
+        ? $self->bucket . "/" . (join '/', map {$self->s3->_urlencode($_)} split /\//, $key)
         : $self->bucket . "/";
 }
 

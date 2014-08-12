@@ -1,7 +1,9 @@
 package Net::Amazon::S3::Request::ListAllMyBuckets;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';
+
+# ABSTRACT: An internal class to list all buckets
 
 __PACKAGE__->meta->make_immutable;
 
@@ -18,9 +20,8 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::ListAllMyBuckets - An internal class to list all buckets
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 

@@ -1,15 +1,19 @@
 package Net::Amazon::S3::HTTPRequest;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use HTTP::Date;
-use MIME::Base64 qw(encode_base64);
+use MIME::Base64 qw( encode_base64 );
 use Moose::Util::TypeConstraints;
+use URI::Escape qw( uri_escape_utf8 );
 use URI::QueryParam;
+use URI;
+
+# ABSTRACT: Create a signed HTTP::Request
 
 my $METADATA_PREFIX      = 'x-amz-meta-';
 my $AMAZON_HEADER_PREFIX = 'x-amz-';
 
-enum 'HTTPMethod' => qw(DELETE GET HEAD PUT);
+enum 'HTTPMethod' => qw(DELETE GET HEAD PUT POST);
 
 has 's3'     => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 has 'method' => ( is => 'ro', isa => 'HTTPMethod',      required => 1 );
@@ -84,10 +88,17 @@ sub _add_auth_header {
     my ( $self, $headers, $method, $path ) = @_;
     my $aws_access_key_id     = $self->s3->aws_access_key_id;
     my $aws_secret_access_key = $self->s3->aws_secret_access_key;
+    my $aws_session_token     = $self->s3->aws_session_token;
 
     if ( not $headers->header('Date') ) {
         $headers->header( Date => time2str(time) );
     }
+
+    if ( not $headers->header('x-amz-security-token') and
+         defined $aws_session_token ) {
+        $headers->header( 'x-amz-security-token' => $aws_session_token );
+    }
+
     my $canonical_string
         = $self->_canonical_string( $method, $path, $headers );
     my $encoded_canonical
@@ -137,13 +148,18 @@ sub _canonical_string {
     $path =~ /^([^?]*)/;
     $buf .= "/$1";
 
-    # ...unless there is an acl or torrent parameter
-    if ( $path =~ /[&?]acl($|=|&)/ ) {
-        $buf .= '?acl';
-    } elsif ( $path =~ /[&?]torrent($|=|&)/ ) {
-        $buf .= '?torrent';
-    } elsif ( $path =~ /[&?]location($|=|&)/ ) {
-        $buf .= '?location';
+    # ...unless there any parameters we're interested in...
+    if ( $path =~ /[&?](acl|torrent|location|uploads|delete)($|=|&)/ ) {
+        $buf .= "?$1";
+    } elsif ( my %query_params = URI->new($path)->query_form ){
+        #see if the remaining parsed query string provides us with any query string or upload id
+        if($query_params{partNumber} && $query_params{uploadId}){
+            #re-evaluate query string, the order of the params is important for request signing, so we can't depend on URI to do the right thing
+            $buf .= sprintf("?partNumber=%s&uploadId=%s", $query_params{partNumber}, $query_params{uploadId});
+        }
+        elsif($query_params{uploadId}){
+            $buf .= sprintf("?uploadId=%s",$query_params{uploadId});
+        }
     }
 
     return $buf;
@@ -218,9 +234,8 @@ sub _urlencode {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::HTTPRequest - Create a signed HTTP::Request
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 

@@ -1,16 +1,22 @@
 package Net::Amazon::S3::Client::Object;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use DateTime::Format::HTTP;
-use Digest::MD5 qw(md5 md5_hex);
+use Digest::MD5 qw(md5_hex);
 use Digest::MD5::File qw(file_md5 file_md5_hex);
 use File::stat;
 use MIME::Base64;
 use Moose::Util::TypeConstraints;
-use MooseX::Types::DateTimeX qw( DateTime );
+use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
+use IO::File 1.14;
+
+# ABSTRACT: An easy-to-use Amazon S3 client object
 
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
+
+enum 'StorageClass' =>
+    qw(standard reduced_redundancy);
 
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );
@@ -30,10 +36,27 @@ has 'content_type' => (
     required => 0,
     default  => 'binary/octet-stream'
 );
+has 'content_disposition' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 0,
+);
 has 'content_encoding' => (
     is       => 'ro',
     isa      => 'Str',
     required => 0,
+);
+has 'storage_class' => (
+    is       => 'ro',
+    isa      => 'StorageClass',
+    required => 0,
+    default  => 'standard',
+);
+has 'user_metadata' => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    required => 0,
+    default  => sub { {} },
 );
 
 __PACKAGE__->meta->make_immutable;
@@ -52,7 +75,7 @@ sub exists {
     return $http_response->code == 200 ? 1 : 0;
 }
 
-sub get {
+sub _get {
     my $self = shift;
 
     my $http_request = Net::Amazon::S3::Request::GetObject->new(
@@ -64,8 +87,12 @@ sub get {
 
     my $http_response = $self->client->_send_request($http_request);
     my $content       = $http_response->content;
+    $self->_load_user_metadata($http_response);
 
     my $md5_hex = md5_hex($content);
+    my $etag = $self->etag || $self->_etag($http_response);
+    confess 'Corrupted download'
+      if( !$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
 
     if ( $self->etag ) {
         confess 'Corrupted download' if $self->etag ne $md5_hex;
@@ -73,11 +100,21 @@ sub get {
         confess 'Corrupted download'
             if $self->_etag($http_response) ne $md5_hex;
     }
-    return $content;
+    return $http_response;
+}
+
+sub get {
+    my $self = shift;
+    return $self->_get->content;
+}
+
+sub get_decoded {
+    my $self = shift;
+    return $self->_get->decoded_content(@_);
 }
 
 sub get_filename {
-    my ( $self, $filename ) = @_;
+    my ($self, $filename) = @_;
 
     my $http_request = Net::Amazon::S3::Request::GetObject->new(
         s3     => $self->client->s3,
@@ -87,28 +124,44 @@ sub get_filename {
     )->http_request;
 
     my $http_response
-        = $self->client->_send_request( $http_request, $filename );
+        = $self->client->_send_request($http_request, $filename);
+
+    $self->_load_user_metadata($http_response);
 
     my $md5_hex = file_md5_hex($filename);
 
-    if ( $self->etag ) {
-        confess 'Corrupted download' if $self->etag ne $md5_hex;
-    } else {
-        confess 'Corrupted download'
-            if $self->_etag($http_response) ne $md5_hex;
+    my $etag = $self->etag || $self->_etag($http_response);
+    confess
+      'Corrupted download' if(!$self->_is_multipart_etag($etag) && $etag ne $md5_hex);
+}
+
+sub _load_user_metadata {
+    my ( $self, $http_response ) = @_;
+
+    my %user_metadata;
+    for my $header_name ($http_response->header_field_names) {
+        my ($metadata_name) = lc($header_name) =~ /\A x-amz-meta- (.*) \z/xms
+            or next;
+        $user_metadata{$metadata_name} = $http_response->header($header_name);
     }
+
+    %{ $self->user_metadata } = %user_metadata;
 }
 
 sub put {
     my ( $self, $value ) = @_;
-    my $md5        = md5($value);
-    my $md5_hex    = unpack( 'H*', $md5 );
-    my $md5_base64 = encode_base64($md5);
+    $self->_put( $value, length $value, md5_hex($value) );
+}
+
+sub _put {
+    my ( $self, $value, $size, $md5_hex ) = @_;
+
+    my $md5_base64 = encode_base64( pack( 'H*', $md5_hex ) );
     chomp $md5_base64;
 
     my $conf = {
         'Content-MD5'    => $md5_base64,
-        'Content-Length' => length $value,
+        'Content-Length' => $size,
         'Content-Type'   => $self->content_type,
     };
 
@@ -119,6 +172,14 @@ sub put {
     if ( $self->content_encoding ) {
         $conf->{'Content-Encoding'} = $self->content_encoding;
     }
+    if ( $self->content_disposition ) {
+        $conf->{'Content-Disposition'} = $self->content_disposition;
+    }
+    if ( $self->storage_class && $self->storage_class ne 'standard' ) {
+        $conf->{'x-amz-storage-class'} = uc $self->storage_class;
+    }
+    $conf->{"x-amz-meta-\L$_"} = $self->user_metadata->{$_}
+        for keys %{ $self->user_metadata };
 
     my $http_request = Net::Amazon::S3::Request::PutObject->new(
         s3        => $self->client->s3,
@@ -131,7 +192,8 @@ sub put {
 
     my $http_response = $self->client->_send_request($http_request);
 
-    confess 'Error uploading' if $http_response->code != 200;
+    confess 'Error uploading ' . $http_response->as_string
+        if $http_response->code != 200;
 
     my $etag = $self->_etag($http_response);
 
@@ -148,39 +210,7 @@ sub put_filename {
         $size = $stat->size;
     }
 
-    my $md5 = pack( 'H*', $md5_hex );
-    my $md5_base64 = encode_base64($md5);
-    chomp $md5_base64;
-
-    my $conf = {
-        'Content-MD5'    => $md5_base64,
-        'Content-Length' => $size,
-        'Content-Type'   => $self->content_type,
-    };
-
-    if ( $self->expires ) {
-        $conf->{Expires}
-            = DateTime::Format::HTTP->format_datetime( $self->expires );
-    }
-    if ( $self->content_encoding ) {
-        $conf->{'Content-Encoding'} = $self->content_encoding;
-    }
-
-    my $http_request = Net::Amazon::S3::Request::PutObject->new(
-        s3        => $self->client->s3,
-        bucket    => $self->bucket->name,
-        key       => $self->key,
-        value     => $self->_content_sub($filename),
-        headers   => $conf,
-        acl_short => $self->acl_short,
-    )->http_request;
-
-    my $http_response = $self->client->_send_request($http_request);
-
-    confess 'Error uploading' . $http_response->as_string
-        if $http_response->code != 200;
-
-    confess 'Corrupted upload' if $self->_etag($http_response) ne $md5_hex;
+    $self->_put( $self->_content_sub($filename), $size, $md5_hex );
 }
 
 sub delete {
@@ -193,6 +223,60 @@ sub delete {
     )->http_request;
 
     $self->client->_send_request($http_request);
+}
+
+sub initiate_multipart_upload {
+    my $self = shift;
+    my $http_request = Net::Amazon::S3::Request::InitiateMultipartUpload->new(
+        s3     => $self->client->s3,
+        bucket => $self->bucket->name,
+        key    => $self->key,
+    )->http_request;
+    my $xpc = $self->client->_send_request_xpc($http_request);
+    my $upload_id = $xpc->findvalue('//s3:UploadId');
+    confess "Couldn't get upload id from initiate_multipart_upload response XML"
+      unless $upload_id;
+
+    return $upload_id;
+}
+
+sub complete_multipart_upload {
+    my $self = shift;
+
+    my %args = ref($_[0]) ? %{$_[0]} : @_;
+
+    #set default args
+    $args{s3}       = $self->client->s3;
+    $args{key}      = $self->key;
+    $args{bucket}   = $self->bucket->name;
+
+    my $http_request =
+      Net::Amazon::S3::Request::CompleteMultipartUpload->new(%args)->http_request;
+    return $self->client->_send_request($http_request);
+}
+
+sub put_part {
+    my $self = shift;
+
+    my %args = ref($_[0]) ? %{$_[0]} : @_;
+
+    #set default args
+    $args{s3}       = $self->client->s3;
+    $args{key}      = $self->key;
+    $args{bucket}   = $self->bucket->name;
+    #work out content length header
+    $args{headers}->{'Content-Length'} = length $args{value}
+      if(defined $args{value});
+
+    my $http_request =
+      Net::Amazon::S3::Request::PutPart->new(%args)->http_request;
+    return $self->client->_send_request($http_request);
+}
+
+sub list_parts {
+    confess "Not implemented";
+    # TODO - Net::Amazon::S3::Request:ListParts is implemented, but need to
+    # define better interface at this level. Currently returns raw XML.
 }
 
 sub uri {
@@ -268,13 +352,17 @@ sub _etag {
     return $etag;
 }
 
+sub _is_multipart_etag {
+    my ( $self, $etag ) = @_;
+    return 1 if($etag =~ /\-\d+$/);
+}
+
 1;
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 
@@ -318,7 +406,7 @@ Net::Amazon::S3::Client::Object - An easy-to-use Amazon S3 client object
   # upload a file
   my $object = $bucket->object(
     key          => 'images/my_hat.jpg',
-    content_type => 'image/jpeg', 
+    content_type => 'image/jpeg',
   );
   $object->put_filename('hat.jpg');
 
@@ -369,6 +457,12 @@ This module represents objects in buckets.
   # to get the vaue of an object
   my $value = $object->get;
 
+=head2 get_decoded
+
+  # get the value of an object, and decode any Content-Encoding and/or
+  # charset; see decoded_content in HTTP::Response
+  my $value = $object->get_decoded;
+
 =head2 get_filename
 
   # download the value of the object into a file
@@ -395,14 +489,18 @@ This module represents objects in buckets.
   );
   $object->put('this is the public value');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using C<content_encoding>, and
+Content-Disposition using C<content_disposition>.
 
-=head2 put_filename 
+You may specify the S3 storage class by setting C<storage_class> to either
+C<standard> or C<reduced_redundancy>; the default is C<standard>.
+
+=head2 put_filename
 
   # upload a file
   my $object = $bucket->object(
     key          => 'images/my_hat.jpg',
-    content_type => 'image/jpeg', 
+    content_type => 'image/jpeg',
   );
   $object->put_filename('hat.jpg');
 
@@ -415,7 +513,14 @@ You may also set Content-Encoding using content_encoding.
   );
   $object->put_filename('hat.jpg');
 
-You may also set Content-Encoding using content_encoding.
+You may also set Content-Encoding using C<content_encoding>, and
+Content-Disposition using C<content_disposition>.
+
+You may specify the S3 storage class by setting C<storage_class> to either
+C<standard> or C<reduced_redundancy>; the default is C<standard>.
+
+User metadata may be set by providing a non-empty hashref as
+C<user_metadata>.
 
 =head2 query_string_authentication_uri
 
@@ -437,3 +542,48 @@ You may also set Content-Encoding using content_encoding.
   # return the URI of a publically-accessible object
   my $uri = $object->uri;
 
+=head2 initiate_multipart_upload
+
+  #initiate a new multipart upload for this object
+  my $object = $bucket->object(
+    key         => 'massive_video.avi'
+  );
+  my $upload_id = $object->initiate_multipart_upload;
+
+=head2 put_part
+
+  #add a part to a multipart upload
+  my $put_part_response = $object->put_part(
+     upload_id      => $upload_id,
+     part_number    => 1,
+     value          => $chunk_content,
+  );
+  my $part_etag = $put_part_response->header('ETag')
+
+  Returns an L<HTTP::Response> object. It is necessary to keep the ETags for
+  each part, as these are required to complete the upload.
+
+=head2 complete_multipart_upload
+
+  #complete a multipart upload
+  $object->complete_multipart_upload(
+    upload_id       => $upload_id,
+    etags           => [$etag_1, $etag_2],
+    part_numbers    => [$part_number_1, $part_number2],
+  );
+
+  The etag and part_numbers parameters are ordered lists specifying the part
+  numbers and ETags for each individual part of the multipart upload.
+
+=head2 user_metadata
+
+  my $object = $bucket->object(key => $key);
+  my $content = $object->get; # or use $object->get_filename($filename)
+
+  # return the user metadata downloaded, as a hashref
+  my $user_metadata = $object->user_metadata;
+
+To upload an object with user metadata, set C<user_metadata> at construction
+time to a hashref, with no C<x-amz-meta-> prefixes on the key names.  When
+downloading an object, the C<get>, C<get_decoded> and C<get_filename>
+methods set the contents of C<user_metadata> to the same format.

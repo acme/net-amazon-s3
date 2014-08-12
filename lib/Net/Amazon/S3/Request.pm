@@ -1,8 +1,10 @@
 package Net::Amazon::S3::Request;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use Moose::Util::TypeConstraints;
 use Regexp::Common qw /net/;
+
+# ABSTRACT: Base class for request objects
 
 enum 'AclShort' =>
     qw(private public-read public-read-write authenticated-read);
@@ -45,17 +47,13 @@ __PACKAGE__->meta->make_immutable;
 sub _uri {
     my ( $self, $key ) = @_;
     return ($key)
-        ? $self->bucket . "/" . $self->s3->_urlencode($key)
+        ? $self->bucket . "/" . (join '/', map {$self->s3->_urlencode($_)} split /\//, $key)
         : $self->bucket . "/";
 }
 
 1;
 
 __END__
-
-=head1 NAME
-
-Net::Amazon::S3::Request - Base class for request objects
 
 =head1 SYNOPSIS
 

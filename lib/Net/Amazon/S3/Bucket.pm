@@ -1,9 +1,9 @@
 package Net::Amazon::S3::Bucket;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use Carp;
 use File::stat;
-use IO::File;
+use IO::File 1.14;
 
 has 'account' => ( is => 'ro', isa => 'Net::Amazon::S3', required => 1 );
 has 'bucket'  => ( is => 'ro', isa => 'Str',             required => 1 );
@@ -11,9 +11,10 @@ has 'creation_date' => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
-=head1 NAME
+# ABSTRACT: convenience object for working with Amazon S3 buckets
 
-Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 
@@ -25,7 +26,7 @@ Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets
   ok($bucket->add_key("key", "data", {
      content_type => "text/html",
     'x-amz-meta-colour' => 'orange',
-  });
+  }));
 
   # the err and errstr methods just proxy up to the Net::Amazon::S3's
   # objects err/errstr methods.
@@ -56,7 +57,7 @@ Net::Amazon::S3::Bucket - convenience object for working with Amazon S3 buckets
 
   # delete the entire bucket (Amazon requires it first be empty)
   $bucket->delete_bucket;
- 
+
 =head1 DESCRIPTION
 
 This module represents an S3 bucket.  You get a bucket object
@@ -336,7 +337,7 @@ sub get_key {
 
 =head2 get_key_filename $key_name $method $filename
 
-Use this to download large files from S3. Takes a key name and an optional 
+Use this to download large files from S3. Takes a key name and an optional
 HTTP method (which defaults to C<GET>. Fetches the key from AWS and writes
 it to the filename. THe value returned will be empty.
 
@@ -379,7 +380,7 @@ sub delete_key {
 
 =head2 delete_bucket
 
-Delete the current bucket object from the server. Takes no arguments. 
+Delete the current bucket object from the server. Takes no arguments.
 
 Fails if the bucket has anything in it.
 
@@ -475,13 +476,13 @@ Takes a configuration hash_ref containing:
 
 =over
 
-=item acl_xml (cannot be used in conjuction with acl_short)
+=item acl_xml (cannot be used in conjunction with acl_short)
 
 An XML string which contains access control information which matches
 Amazon's published schema.  There is an example of one of these XML strings
 in the tests for this module.
 
-=item acl_short (cannot be used in conjuction with acl_xml)
+=item acl_short (cannot be used in conjunction with acl_xml)
 
 You can use the shorthand notation instead of specifying XML for
 certain 'canned' types of acls.

@@ -1,8 +1,10 @@
 package Net::Amazon::S3::Request::ListBucket;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use URI::Escape qw(uri_escape_utf8);
 extends 'Net::Amazon::S3::Request';
+
+# ABSTRACT: An internal class to list a bucket
 
 has 'bucket'    => ( is => 'ro', isa => 'BucketName', required => 1 );
 has 'prefix'    => ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
@@ -19,7 +21,7 @@ sub http_request {
     my $path = $self->bucket . "/";
 
     my @post;
-    foreach my $method qw(prefix delimiter max_keys marker) {
+    foreach my $method ( qw(prefix delimiter max_keys marker) ) {
         my $value = $self->$method;
         next unless $value;
         my $key = $method;
@@ -46,9 +48,8 @@ sub _urlencode {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::ListBucket - An internal class to list a bucket
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 

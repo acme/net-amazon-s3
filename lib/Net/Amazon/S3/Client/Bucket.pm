@@ -1,8 +1,10 @@
 package Net::Amazon::S3::Client::Bucket;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 use Data::Stream::Bulk::Callback;
-use MooseX::Types::DateTimeX qw( DateTime );
+use MooseX::Types::DateTime::MoreCoercions 0.07 qw( DateTime );
+
+# ABSTRACT: An easy-to-use Amazon S3 client bucket
 
 has 'client' =>
     ( is => 'ro', isa => 'Net::Amazon::S3::Client', required => 1 );
@@ -130,6 +132,18 @@ sub list {
     );
 }
 
+sub delete_multi_object {
+    my $self = shift;
+    my @objects = @_;
+    return unless( scalar(@objects) );
+    my $http_request = Net::Amazon::S3::Request::DeleteMultiObject->new(
+        s3      => $self->client->s3,
+        bucket  => $self->name,
+        keys    => [ map($_->key, @objects) ],
+    )->http_request;
+    return $self->client->_send_request($http_request);
+}
+
 sub object {
     my ( $self, %conf ) = @_;
     return Net::Amazon::S3::Client::Object->new(
@@ -139,13 +153,13 @@ sub object {
     );
 }
 
+
 1;
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Client::Bucket - An easy-to-use Amazon S3 client bucket
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 
@@ -159,7 +173,7 @@ Net::Amazon::S3::Client::Bucket - An easy-to-use Amazon S3 client bucket
   my $acl = $bucket->acl;
 
   # list objects in the bucket
-  # this returns a L<Data::Stream::Bulk> object which returns a 
+  # this returns a L<Data::Stream::Bulk> object which returns a
   # stream of L<Net::Amazon::S3::Client::Object> objects, as it may
   # have to issue multiple API requests
   my $stream = $bucket->list;
@@ -198,7 +212,7 @@ This module represents buckets.
 =head2 list
 
   # list objects in the bucket
-  # this returns a L<Data::Stream::Bulk> object which returns a 
+  # this returns a L<Data::Stream::Bulk> object which returns a
   # stream of L<Net::Amazon::S3::Client::Object> objects, as it may
   # have to issue multiple API requests
   my $stream = $bucket->list;
@@ -227,3 +241,9 @@ This module represents buckets.
   # be used to get or put
   my $object = $bucket->object( key => 'this is the key' );
 
+=head2 delete_multi_object
+
+  # delete multiple objects using a multi object delete operation
+  # Accepts a list of L<Net::Amazon::S3::Client::Object> objects.
+  # Limited to a maximum of 1000 objects in one operation
+  $bucket->delete_multi_object($object1, $object2)

@@ -32,11 +32,11 @@ $OWNER_ID          = $response->{owner_id};
 $OWNER_DISPLAYNAME = $response->{owner_displayname};
 
 TODO: {
-    local $TODO = "These tests only work if you're leon";
+    local $TODO = "These tests only work if you're pedro";
 
-    like( $response->{owner_id}, qr/^46a801915a1711f/ );
-    is( $response->{owner_displayname},   '_acme_' );
-    is( scalar @{ $response->{buckets} }, 9 );
+    like( $response->{owner_id}, qr/^c7483d612ac7f0c0/ );
+    is( $response->{owner_displayname},   'pedro_figueiredo' );
+    is( scalar @{ $response->{buckets} }, 6 );
 }
 
 for my $location ( undef, 'EU' ) {
@@ -255,7 +255,7 @@ for my $location ( undef, 'EU' ) {
 
     $response = $bucket_obj->get_key($keyname);
     is( $response->{content_type}, 'text/plain' );
-    like( $response->{value}, qr/and unknown Amazon/ );
+    like( $response->{value}, qr/Amazon Digital Services/ );
     is( $response->{etag},                $readme_md5 );
     is( $response->{'x-amz-meta-colour'}, 'orangy' );
     is( $response->{content_length},      $readme_size );

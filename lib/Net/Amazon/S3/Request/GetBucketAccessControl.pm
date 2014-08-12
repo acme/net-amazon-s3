@@ -1,7 +1,9 @@
 package Net::Amazon::S3::Request::GetBucketAccessControl;
-use Moose;
-use MooseX::StrictConstructor;
+use Moose 0.85;
+use MooseX::StrictConstructor 0.16;
 extends 'Net::Amazon::S3::Request';
+
+# ABSTRACT: An internal class to get a bucket's access control
 
 has 'bucket' => ( is => 'ro', isa => 'BucketName', required => 1 );
 
@@ -21,9 +23,8 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::GetBucketAccessControl - An internal class to get a bucket's access control
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,8 @@
 package Net::Amazon::S3::Request::CreateBucket;
-use Moose;
+use Moose 0.85;
 extends 'Net::Amazon::S3::Request';
+
+# ABSTRACT: An internal class to create a bucket
 
 has 'bucket'    => ( is => 'ro', isa => 'BucketName',      required => 1 );
 has 'acl_short' => ( is => 'ro', isa => 'Maybe[AclShort]', required => 0 );
@@ -40,9 +42,8 @@ sub http_request {
 
 __END__
 
-=head1 NAME
-
-Net::Amazon::S3::Request::CreateBucket - An internal class to create a bucket
+=for test_synopsis
+no strict 'vars'
 
 =head1 SYNOPSIS
 

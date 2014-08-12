@@ -1,5 +1,37 @@
 Revision history for Perl module Net::Amazon::S3:
 
+{{$NEXT}}
+
+0.59 Sat Mar 17 09:36:38 GMT 2013
+    - Added support for security token authentication (patch by Miquel Ruiz)
+
+0.58 Wed Nov 28 16:22:42 GMT 2012
+    - Added support for multi-part upload and multiple objects deletion (patch
+      by Robert B. Clarke)
+
+0.57 Sun Sep 16 22:38:38 BST 2012
+    - Added support for Content-disposition (initial patch by Michele Beltrame)
+    - Added sync_up option to s3cl (patch by Leo Lapworth)
+    - Dist::Zilla tidying
+
+0.56 Sun Dec 18 22:22:32 GMT 2011
+    - Spelling error (RT #69817, patch from Fabrizio Regalli)
+    - Added use_ok tests (RT #72856, suggested by Gregor Herrmann)
+    - Added missing use URI::Escape (RT #72857, patch from Gregor Herrmann)
+    - Bumped dependency on MooseX::StrictConstructor to 0.16 (RT #73229,
+      suggested by Andrew Main)
+    - Enforce dependency versions (RT #73193, suggested by Andrew Main)
+
+0.55 Sat Dec 10 00:55:29 GMT 2011
+    - Replaced dependency on MooseX::Types::DateTimeX with
+      MooseX::Types::DateTime::MoreCoercions (RT #72472).
+
+0.54 Sat Mar 21 21:23:32 BST 2011
+    - Fix for a naked qw() warning (patch by David Wheeler)
+    - Fixed path issues (patch by Pavel Karoukin)
+      *WARNING* THIS MIGHT BREAK EXISTING APPS *WARNING*
+    - Author and development information changes
+
 0.53 Tue Mar 30 15:24:19 BST 2010
     - fix authenticated urls to work with EU buckets (patch by Edmund
       von der Burg)
@@ -54,7 +86,7 @@ Revision history for Perl module Net::Amazon::S3:
     - remove DateTime::Format::Strptime prerequisite as it was not
       being used (noticed by Yen-Ming Lee)
     - do not try and parse non-XML errors (patch by lostlogic)
-    - make it possible to store and delete the key "0" 
+    - make it possible to store and delete the key "0"
       (patch by Joey Hess)
     - make it possible to store empty files (patch by BDOLAN)
     - add Copy support (patch by BDOLAN)
